@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "EditorConfig.EditorConfig",
+    "github.vscode-github-actions",
+    "eamodio.gitlens",
+    "ms-vscode.vscode-typescript-next",
+    "yzhang.markdown-all-in-one",
+    "PKief.material-icon-theme",
+    "mongodb.mongodb-vscode",
+    "Postman.postman-for-vscode",
+    "esbenp.prettier-vscode",
+    "Gruntfuggly.todo-tree",
+    "redhat.vscode-yaml",
+    "jock.svg"
+  ]
+}

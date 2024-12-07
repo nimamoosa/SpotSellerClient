@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import MainLayout from "@/components/main_layout";
+import SocketProvider from "../contexts/socketContext";
+import ControllerProvider from "@/contexts/controllerContext";
+import { Toaster } from "@/components/ui/toaster";
+import { ToastProvider } from "@/components/ui/toast";
+import AuthProvider from "@/contexts/authContext";
+import CourseProvider from "@/contexts/courseContext";
+import BotProvider from "@/contexts/botContext";
+import BotVisitProvider from "@/contexts/botVisitContext";
+import RegisteredUsersProvider from "@/contexts/registeredUsersContext";
+import TransactionProvider from "@/contexts/transactionContext";
+import BotSupportProvider from "@/contexts/botSupportContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -11,6 +23,12 @@ const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
+});
+
+const geist = localFont({
+  src: "./fonts/woff/IRANSansX-Black.woff",
+  variable: "--font-geist",
+  weight: "300",
 });
 
 export const metadata: Metadata = {
@@ -24,11 +42,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" dir="rtl">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`min-h-full flex items-center font-sans justify-center overflow-hidden bg-[#CEBEE4] text-black`}
       >
-        {children}
+        <ToastProvider>
+          <SocketProvider>
+            <AuthProvider>
+              <CourseProvider>
+                <BotProvider>
+                  <BotVisitProvider>
+                    <RegisteredUsersProvider>
+                      <BotSupportProvider>
+                        <TransactionProvider>
+                          <ControllerProvider>{children}</ControllerProvider>
+                          <Toaster />
+                        </TransactionProvider>
+                      </BotSupportProvider>
+                    </RegisteredUsersProvider>
+                  </BotVisitProvider>
+                </BotProvider>
+              </CourseProvider>
+            </AuthProvider>
+          </SocketProvider>
+        </ToastProvider>
       </body>
     </html>
   );

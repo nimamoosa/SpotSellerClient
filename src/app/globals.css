@@ -3,19 +3,294 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --wd-text-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto, Ubuntu,
+    sans-serif !important;
+  --wd-title-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto, Ubuntu,
+    sans-serif !important;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-Thin.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-Thin.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-UltraLight.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-UltraLight.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-Light.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-Light.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-Medium.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-Medium.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-DemiBold.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-DemiBold.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-ExtraBold.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-ExtraBold.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-Black.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-Black.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: bold;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-Bold.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-Bold.woff") format("woff");
+}
+
+@font-face {
+  font-family: IRANSansX;
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: url("./fonts/woff2/IRANSansX-Regular.woff2") format("woff2"),
+    url("./fonts/woff/IRANSansX-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "IRANSansXVF";
+  font-display: swap;
+  src: url("./fonts/variable/IRANSansXV.woff2") format("woff2-variations"),
+    url("./fonts/variable/IRANSansXV.woff2") format("woff2") tech("variations");
+  font-weight: 400 700;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: local("Roboto");
+  ascent-override: 93%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Times New Roman";
+  src: local("Times New Roman");
+  ascent-override: 89%;
+  descent-override: 21%;
+  line-gap-override: 4%;
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  src: local("Ubuntu");
+  ascent-override: 93%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+}
+
+/* Variables */
+:root {
+  --wd-text-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto, Ubuntu,
+    sans-serif !important;
+  --wd-title-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto, Ubuntu,
+    sans-serif !important;
+  --wd-entities-title-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto,
+    Ubuntu, sans-serif !important;
+  --wd-widget-title-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto,
+    Ubuntu, sans-serif !important;
+  --wd-header-el-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto,
+    Ubuntu, sans-serif !important;
+}
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  font-family: var(--wd-text-font) !important;
+  -moz-font-feature-settings: "ss02" !important;
+  -webkit-font-feature-settings: "ss02" !important;
+  font-feature-settings: "ss02" !important;
+}
+
+/* Adding styles for button */
+button,
+input[type="button"],
+input[type="submit"] {
+  font-family: var(--wd-text-font) !important;
 }

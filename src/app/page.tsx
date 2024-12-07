@@ -1,101 +1,191 @@
-import Image from "next/image";
+"use client";
+
+import Alert from "@/components/alert";
+import Auth from "@/components/auth";
+import CompleteAuth from "@/components/completeAuth";
+import GetAuthCode from "@/components/getAuthCode";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/authContext";
+import { useBot } from "@/contexts/botContext";
+import { useController } from "@/contexts/controllerContext";
+import { toast as Toast } from "@/hooks/use-toast";
+import useLoading from "@/hooks/useLoading";
+import { useSocketRequest } from "@/hooks/useSocketRequest";
+import { randomBytes } from "crypto";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [authId, setAuthId] = useState<string>("");
+  const [state, setState] = useState<"auth" | "submit_code" | "complete_auth">(
+    "auth"
+  );
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const { sendEvent, receiverEvent } = useSocketRequest();
+  const { auth, code, setOpenToast, setToast, name } = useController();
+  const { startLoading, stopLoading, isLoading } = useLoading();
+  const { setBot } = useBot();
+
+  const [codeRoute, setCodeRoute] = useState("");
+  const { user, setUser } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push(codeRoute ? `/dashboard?code=${codeRoute}` : "/dashboard");
+    }
+  }, [user, isLoading]);
+
+  useEffect(() => {
+    const auth_id = localStorage.getItem("authId");
+    if (auth_id) {
+      setAuthId(auth_id);
+    } else {
+      setAuthId(randomBytes(20).toString("hex"));
+    }
+  }, []);
+
+  useEffect(() => {
+    receiverEvent("authenticationEvent", (data) => {
+      setState("submit_code");
+
+      setOpenToast(true);
+      setToast({ description: data.message });
+      stopLoading();
+      return;
+    });
+
+    receiverEvent("loginEventReceiver", (data) => {
+      const { auth } = data;
+
+      if (!data.success) {
+        setOpenToast(true);
+        setToast({
+          description: data.message,
+        });
+        return;
+      }
+
+      const setCookie = async () => {
+        await fetch("/api/auth", {
+          method: "POST",
+          body: JSON.stringify({ sessionId: data.auth.sessionId }),
+        });
+      };
+
+      setCookie();
+
+      setCodeRoute(data.code);
+      setUser(auth);
+      setBot(data.bot);
+      stopLoading();
+    });
+
+    receiverEvent("checkCodeEventReceiver", (data) => {
+      if (!data.success) {
+        setOpenToast(true);
+        setToast({
+          description: data.message,
+        });
+        stopLoading();
+        return;
+      }
+
+      setState("complete_auth");
+      stopLoading();
+    });
+  }, []);
+
+  useEffect(() => {
+    receiverEvent("createBotEventReceiver", (data) => {
+      const { success } = data;
+
+      if (!success) {
+        setOpenToast(true);
+        setToast({
+          description: data.message,
+        });
+        stopLoading();
+        return;
+      }
+
+      sendEvent("login", {
+        auth_filed: data.auth_filed,
+        name: data.name,
+        botId: data.botId,
+        site: data.site,
+        token: data.data.token,
+      });
+    });
+  }, []);
+
+  Alert();
+
+  const handleSendCode = () => {
+    sendEvent("authentication", { provider: "phone_number", auth_filed: auth });
+    startLoading();
+  };
+
+  const handleSubmitCode = () => {
+    sendEvent("checkCode", { code, auth_filed: auth });
+    startLoading();
+  };
+
+  const handleCreateBot = (
+    token: string,
+    site: { is_site: boolean; site_link: string }
+  ) => {
+    startLoading();
+    sendEvent("createBot", { token, site, name, auth_filed: auth });
+  };
+
+  return (
+    <main className="flex w-full">
+      <div className="w-[25%] h-full">
+        <AnimatePresence mode="wait">
+          {state === "auth" ? (
+            <motion.div
+              initial={{ y: -100, opacity: 0.1 }}
+              animate={{ x: 0, y: 0, opacity: 1 }}
+              exit={{ y: -150, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeIn" }}
+              className="w-full h-[100vh]"
+              key={"auth"}
+            >
+              <Auth onClick={handleSendCode} />
+            </motion.div>
+          ) : state === "submit_code" ? (
+            <motion.div
+              initial={{ y: 100, opacity: 0.1 }}
+              animate={{ x: 0, y: 0, opacity: 1 }}
+              exit={{ y: 150, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeIn" }}
+              className="w-full h-[100vh]"
+              key={"submit_code"}
+            >
+              <GetAuthCode onClick={handleSubmitCode} />
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ y: 100, opacity: 0.1 }}
+              animate={{ x: 0, y: 0, opacity: 1 }}
+              exit={{ y: 150, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeIn" }}
+              className="w-full h-[100vh]"
+              key={"complete_auth"}
+            >
+              <CompleteAuth onSubmit={handleCreateBot} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="w-[75%]">
+        <div className="w-full flex items-center justify-end h-[100vh]">
+          <img src="login.png" alt="" className="w-[1200px] h-full" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }

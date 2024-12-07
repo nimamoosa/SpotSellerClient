@@ -1,0 +1,110 @@
+"use client";
+
+import { Plus, Search } from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import { useCourse } from "@/contexts/courseContext";
+import { useEffect } from "react";
+import { CourseType } from "@/types/course";
+
+export default function ShowCourse({
+  addCourse,
+  editCourse,
+  saleState,
+}: {
+  addCourse?: () => void;
+  editCourse?: (course: CourseType) => void;
+  saleState?: (course: CourseType) => void;
+}) {
+  const { courses } = useCourse();
+
+  return (
+    <div>
+      <header className="flex justify-between items-center">
+        <div className="w-[50%]">
+          <div>
+            <Button
+              variant={"ghost"}
+              className="w-[22%] h-[45px] text-[16px] rounded-[10px] border-2 border-[#D6D6D6]"
+              onClick={addCourse}
+            >
+              <Plus /> افزودن دوره
+            </Button>
+          </div>
+        </div>
+
+        <div className="w-[50%] flex items-center justify-end">
+          <div className="ml-3">
+            <Input
+              className="h-[48px] border-2 rounded-[10px] border-[#D6D6D6]"
+              placeholder="جستجو..."
+            />
+          </div>
+
+          <div className="flex items-center justify-end">
+            <Button className="size-12 rounded-[10px]">
+              <Search />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mt-7 w-full">
+        <Table
+          className="overflow-auto rounded-lg border-2 border-[#D6D6D6]"
+          style={{ borderCollapse: "separate" }}
+        >
+          <TableHeader className="w-full">
+            <TableRow>
+              <TableHead className="w-[70%] border-l-[1px] border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
+                عنوان دوره
+              </TableHead>
+              <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
+                عملیات
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {courses?.map((item, index) => {
+              return (
+                <TableRow className="hover:bg-transparent" key={index}>
+                  <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
+                    {item.title}
+                  </TableCell>
+                  <TableCell className="flex justify-center">
+                    <div className="ml-2">
+                      <Button
+                        className="bg-[#66BB00]/10 rounded-[71px] text-[#519506] hover:bg-[#66BB00]/20"
+                        onClick={() => editCourse && editCourse(item)}
+                      >
+                        ویرایش
+                      </Button>
+                    </div>
+
+                    <div>
+                      <Button
+                        className="bg-[#BE6D05]/10 text-[#BE6D05] rounded-[71px] hover:bg-[#BE6D05]/20"
+                        onClick={() => saleState && saleState(item)}
+                      >
+                        وضعیت فروش
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </main>
+    </div>
+  );
+}

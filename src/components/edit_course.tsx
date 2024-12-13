@@ -13,11 +13,13 @@ import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { randomBytes } from "crypto";
+import { BsShop } from "react-icons/bs";
+import AmountInput from "./amount_input";
 
 export default function EditCourse({
   course,
@@ -30,17 +32,22 @@ export default function EditCourse({
     title: string;
     course_id: string;
     description: string;
+    amount: string;
   }>({
     title: "",
     course_id: "",
     description: "",
+    amount: "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [progress, setProgress] = useState(0);
-  const [showImage, setShowImage] = useState(false);
+  const [openAlert, setOpenAlert] = useState(false);
   const [downloadLink, setDownloadLink] = useState("");
   const [isUploaded, setIsUploaded] = useState(false);
+  const [alertType, setAlertType] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
+  const [parameters, setParameters] = useState(false);
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -57,14 +64,18 @@ export default function EditCourse({
 
   useEffect(() => {
     if (course === undefined) return;
+    if (parameters) return;
 
     setValues({
       course_id: course.courseId,
       description: course.description,
       title: course.title,
+      amount: course.amount,
     });
     setPreview(course.media_url);
-  }, [course]);
+    setDiscountCode(course.discount_code);
+    setParameters(true);
+  }, [course, discountCode, parameters]);
 
   useEffect(() => {
     receiverEvent("uploadFileEventReceiver", (data) => {
@@ -94,7 +105,7 @@ export default function EditCourse({
     if (!user) return;
     if (!selectedFile) return;
 
-    uploadFile(selectedFile, "nima", user.userId, user.botId);
+    uploadFile(selectedFile, user.name, user.userId, user.botId);
   }, [isUploaded, user, selectedFile]);
 
   useEffect(() => {
@@ -109,6 +120,7 @@ export default function EditCourse({
       title: values.title,
       description: values.description,
       courseId: values.course_id,
+      amount: values.amount,
       media_url: downloadLink,
     });
 
@@ -204,13 +216,15 @@ export default function EditCourse({
   };
 
   const noChangeCourse = () => {
-    const { course_id, description, title } = values;
+    const { course_id, description, title, amount } = values;
 
     return (
       course_id === course?.courseId &&
       description === course?.description &&
       title === course?.title &&
-      preview === course?.media_url
+      preview === course.media_url &&
+      discountCode == course.discount_code &&
+      amount === course.amount
     );
   };
 
@@ -226,6 +240,8 @@ export default function EditCourse({
       description: values.description,
       courseId: values.course_id,
       media_url: course.media_url,
+      amount: values.amount,
+      discount_code: discountCode,
     });
 
     sendEvent("editCourse", {
@@ -233,10 +249,11 @@ export default function EditCourse({
       _id: course._id,
       updatedCourseData,
     });
-  }, [user, values, course]);
+  }, [user, values, course, discountCode]);
 
   return (
     <form
+      className="-mt-10"
       onSubmit={(e) => {
         e.preventDefault();
 
@@ -249,13 +266,50 @@ export default function EditCourse({
         return handleSubmit();
       }}
     >
-      <AlertDialog open={showImage} onOpenChange={setShowImage}>
-        <AlertDialogContent>
+      <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
+        <AlertDialogContent suppressHydrationWarning>
           <AlertDialogHeader>
             <AlertDialogTitle></AlertDialogTitle>
-            <AlertDialogDescription className="w-full">
-              <img className="w-full rounded-lg" src={preview} alt="" />
-            </AlertDialogDescription>
+            <div className="w-full">
+              {alertType === "preview_image" ? (
+                <img className="w-full rounded-lg" src={preview} alt="" />
+              ) : (
+                <div>
+                  <div>
+                    <Input
+                      maxLength={30}
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value)}
+                      placeholder="کد تخفیف مد نظر خود را وارد کنید"
+                    />
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-end gap-5">
+                    <div>
+                      <Button
+                        variant={"destructive"}
+                        onClick={() => setDiscountCode("")}
+                      >
+                        حذف کد تخفیف
+                      </Button>
+                    </div>
+
+                    <div>
+                      <Button
+                        variant={"secondary"}
+                        onClick={() =>
+                          setDiscountCode(
+                            randomBytes(30).toString("hex").slice(0, 30)
+                          )
+                        }
+                      >
+                        ساخت کد تخفیف
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>بستن</AlertDialogCancel>
@@ -272,7 +326,10 @@ export default function EditCourse({
                   src={preview}
                   alt="course_photo"
                   className="rounded-lg object-cover cursor-pointer w-[100px] h-[55px]"
-                  onClick={() => setShowImage(true)}
+                  onClick={() => {
+                    setAlertType("preview_image");
+                    setOpenAlert(true);
+                  }}
                 />
               ) : (
                 <span className="text-[18px] w-full text-[#7D7D7D]">
@@ -311,8 +368,8 @@ export default function EditCourse({
         </header>
       </section>
 
-      <section className="mt-5">
-        <div className="flex justify-between mb-5">
+      <section className="mt-2">
+        <div className="flex justify-between mb-2">
           <div>
             <Input
               placeholder="عنوان دوره"
@@ -336,6 +393,16 @@ export default function EditCourse({
           </div>
         </div>
 
+        <div className="mb-2">
+          <AmountInput
+            onChange={(v) => {
+              setValues({ ...values, amount: v });
+              console.log(v);
+            }}
+            value={values.amount}
+          />
+        </div>
+
         <div className="flex items-center justify-center">
           <Textarea
             className="w-[1146px] h-[292px] border-[#D6D6D6] border-2 resize-none"
@@ -350,24 +417,42 @@ export default function EditCourse({
         </div>
 
         <div className="mt-4 flex items-center justify-end">
-          <Button
-            variant={"ghost"}
-            className="border-[#D6D6D6] border-2 w-[155px] h-[45px] text-[18px]"
-            type="submit"
-            disabled={isLoading || noChangeCourse()}
-          >
-            {isLoading ? (
-              progress > 100 ? (
-                `${progress} درحال آپلود عکس`
+          <div className="ml-5">
+            <Button
+              variant={"ghost"}
+              className="border-[#D6D6D6] bg-black/20 border-2 w-[100%] h-[45px] text-[16px]"
+              type="button"
+              disabled={isLoading}
+              onClick={() => {
+                setAlertType("get_code");
+                setOpenAlert(true);
+              }}
+            >
+              <BsShop />{" "}
+              {course?.discount_code ? "تغییر کد تخفیف" : "افزودن کد تخفیف"}
+            </Button>
+          </div>
+
+          <div>
+            <Button
+              variant={"ghost"}
+              className="border-[#D6D6D6] border-2 w-[100%] h-[45px] text-[16px]"
+              type="submit"
+              disabled={isLoading || noChangeCourse()}
+            >
+              {isLoading ? (
+                progress > 100 ? (
+                  `${progress} درحال آپلود عکس`
+                ) : (
+                  "درحال ارسال"
+                )
               ) : (
-                "درحال ارسال"
-              )
-            ) : (
-              <>
-                <span>ذخیره</span>
-              </>
-            )}
-          </Button>
+                <>
+                  <span>ذخیره</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </section>
     </form>

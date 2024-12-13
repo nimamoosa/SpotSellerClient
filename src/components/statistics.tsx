@@ -35,41 +35,23 @@ export function Statistics({
   }[];
   activeChart: keyof typeof chartConfig;
 }) {
-  // Filter chartData to remove entries where activeChart data is zero or missing
-  const filteredChartData = React.useMemo(
-    () => chartData.filter((data) => data[activeChart] > 0),
+  // بررسی وجود حداقل یک مقدار غیرصفر
+  const hasNonZeroData = React.useMemo(
+    () => chartData.some((data) => data[activeChart] > 0),
     [chartData, activeChart]
-  );
-
-  // Calculate total for statistics
-  const total = React.useMemo(
-    () =>
-      filteredChartData.length > 0
-        ? {
-            desktop: filteredChartData.reduce(
-              (acc, curr) => acc + curr.telegram_views_count,
-              0
-            ),
-            mobile: filteredChartData.reduce(
-              (acc, curr) => acc + curr.transaction_count,
-              0
-            ),
-          }
-        : null,
-    [filteredChartData]
   );
 
   return (
     <Card className="w-full">
       <CardContent className="px-2 sm:p-6">
-        {filteredChartData.length > 0 ? ( // Check if there's data to display
+        {hasNonZeroData ? ( // نمایش نمودار اگر حداقل یک مقدار غیرصفر وجود داشته باشد
           <ChartContainer
             config={chartConfig}
             className="aspect-auto h-[250px] w-full"
           >
             <BarChart
               accessibilityLayer
-              data={filteredChartData}
+              data={chartData} // تمام داده‌ها (شامل مقادیر صفر)
               margin={{
                 left: 12,
                 right: 12,
@@ -96,11 +78,12 @@ export function Statistics({
               <Bar
                 dataKey={activeChart}
                 fill={chartConfig[activeChart]?.color}
+                radius={[5, 5, 0, 0]}
               />
             </BarChart>
           </ChartContainer>
         ) : (
-          <p className="text-center">No data available</p> // Message when no data
+          <p className="text-center">No data available</p> // پیام زمانی که همه مقادیر صفر هستند
         )}
       </CardContent>
     </Card>

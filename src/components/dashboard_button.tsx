@@ -15,7 +15,7 @@ export default function DashboardButton({
 }: props) {
   return (
     <Link
-      className={`text-black text-[17px] w-[326px] flex items-center justify-between h-[63.5px] p-5 rounded-full transition-all duration-150 ${className?.className}`}
+      className={`text-black text-[17px] w-[326px] flex items-center justify-between h-[63.5px] p-5 rounded-full transition-all ease-in-out duration-75 ${className?.className}`}
       href={href || "#"}
       role="button"
       onClick={onClick}

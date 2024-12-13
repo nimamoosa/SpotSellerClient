@@ -14,14 +14,21 @@ interface ControllerContextProp {
   setAuth: Dispatch<SetStateAction<string>>;
   code: string;
   setCode: Dispatch<SetStateAction<string>>;
-  toast: { title?: string; description: string };
-  setToast: Dispatch<SetStateAction<{ title?: string; description: string }>>;
-  openToast: boolean;
-  setOpenToast: Dispatch<SetStateAction<boolean>>;
+  alert: {
+    text: string;
+    type?: "success" | "error" | "info" | "warning";
+  } | null;
+  setAlert: Dispatch<
+    SetStateAction<{
+      text: string;
+      type?: "success" | "error" | "info" | "warning";
+    } | null>
+  >;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   name: string;
   setName: Dispatch<SetStateAction<string>>;
+  onCloseAlert: () => void;
 }
 
 const ControllerContext = createContext<ControllerContextProp>({
@@ -29,14 +36,13 @@ const ControllerContext = createContext<ControllerContextProp>({
   setAuth: () => {},
   code: "",
   setCode: () => {},
-  toast: { title: "", description: "" },
-  setToast: () => {},
-  openToast: false,
-  setOpenToast: () => {},
+  alert: null,
+  setAlert: () => {},
   isLoading: false,
   setIsLoading: () => {},
   name: "",
   setName: () => {},
+  onCloseAlert: () => {},
 });
 
 export default function ControllerProvider({
@@ -46,13 +52,22 @@ export default function ControllerProvider({
 }) {
   const [auth, setAuth] = useState("");
   const [code, setCode] = useState("");
-  const [toast, setToast] = useState<{ title?: string; description: string }>({
-    title: "",
-    description: "",
-  });
-  const [openToast, setOpenToast] = useState(false);
+  const [alert, setAlert] = useState<{
+    text: string;
+    type?: "success" | "error" | "info" | "warning";
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
+
+  const handleSetAlert = (newAlert: {
+    text: string;
+    type?: "success" | "error" | "info" | "warning";
+  }) => {
+    setAlert(null); // Clear the current alert first
+    setTimeout(() => {
+      setAlert(newAlert); // Add the new alert after clearing
+    }, 0); // Timeout ensures re-rendering properly
+  };
 
   return (
     <ControllerContext.Provider
@@ -61,14 +76,13 @@ export default function ControllerProvider({
         setAuth,
         code,
         setCode,
-        toast,
-        setToast,
-        openToast,
-        setOpenToast,
+        alert,
+        setAlert,
         isLoading,
         setIsLoading,
         name,
         setName,
+        onCloseAlert: () => {},
       }}
     >
       {children}

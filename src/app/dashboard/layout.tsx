@@ -1,8 +1,9 @@
 "use client";
 
-import Alert from "@/components/alert";
 import MainLayout from "@/components/main_layout";
+import { useAuth } from "@/contexts/authContext";
 import { useController } from "@/contexts/controllerContext";
+import useLoading from "@/hooks/useLoading";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect } from "react";
 
@@ -10,34 +11,35 @@ function InnerComponent() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
   const router = useRouter();
-  const { setOpenToast, setToast } = useController();
+  const { setAlert } = useController();
+  const { user, loadingAuth } = useAuth();
 
   useEffect(() => {
     if (!code) return;
 
     if (code === "200") {
-      setToast({
-        title: "موفقیت آمیز",
-        description: "به SpotSeller خوش آمدید",
+      setAlert({
+        text: "به SpotSeller خوش آمدید",
       });
-      setOpenToast(true);
+
       router.replace("/dashboard");
     } else if (code === "201") {
-      setToast({
-        title: "موفقیت آمیز",
-        description: "اکانت شما با موفقیت ساخته شد",
+      setAlert({
+        text: "اکانت شما با موفقیت ساخته شد",
       });
-      setOpenToast(true);
+
       router.replace("/dashboard");
     }
-  }, [code, setOpenToast, setToast, router]);
+  }, [code, setAlert, router]);
+
+  useEffect(() => {
+    if (!loadingAuth && !user) router.push("/");
+  }, [user, loadingAuth]);
 
   return null;
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  Alert();
-
   return (
     <MainLayout>
       <Suspense fallback={<div>در حال بارگذاری...</div>}>

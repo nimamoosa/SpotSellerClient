@@ -9,4 +9,6 @@ export type CourseType = {
   };
   media_url: string;
   active: boolean;
+  discount_code: string;
+  amount: string;
 };

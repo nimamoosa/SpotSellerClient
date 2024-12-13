@@ -64,12 +64,12 @@ export default function ShowCourse({
           style={{ borderCollapse: "separate" }}
         >
           <TableHeader className="w-full">
-            <TableRow>
-              <TableHead className="w-[70%] border-l-[1px] border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
-                عنوان دوره
+            <TableRow className="font-medium text-[16px]">
+              <TableHead className="w-[70%] border-l-[1px] p-4 border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
+                <p className="mr-3 w-fit">عنوان دوره</p>
               </TableHead>
               <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
-                عملیات
+                <p>عملیات</p>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -78,7 +78,7 @@ export default function ShowCourse({
               return (
                 <TableRow className="hover:bg-transparent" key={index}>
                   <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
-                    {item.title}
+                    <p className="mr-4">{item.title}</p>
                   </TableCell>
                   <TableCell className="flex justify-center">
                     <div className="ml-2">

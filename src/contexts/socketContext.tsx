@@ -14,11 +14,10 @@ import {
 } from "react";
 
 // Create a single socket instance outside the component
-const socketInstance = io("https://fine-bird-lizos-cab75679.koyeb.app", {
+const socketInstance = io("http://api.spotseller.ir/websocket", {
   transports: ["websocket"],
   reconnection: true,
-  port: 8000,
-  // extraHeaders:{}
+  // port: 3000,
 });
 
 const id = crypto.randomUUID();

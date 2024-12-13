@@ -7,7 +7,7 @@ import { useBotVisit } from "@/contexts/botVisitContext";
 import { useCourse } from "@/contexts/courseContext";
 import { useRegisteredUsers } from "@/contexts/registeredUsersContext";
 import { useTransaction } from "@/contexts/transactionContext";
-import { time } from "@/utils/time";
+import { subtractOneDayFromJalaali, time } from "@/utils/time";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   const cards = [
     {
-      header: "100",
+      header: isLoadingTransactions ? "connect...." : transactions?.length,
       description: "تراکنش در این ماه",
       backColor: "bg-[#6611DD]",
       iconBackColor: "bg-[#510EB1]",
@@ -62,14 +62,10 @@ export default function Dashboard() {
       height: 31.16,
     },
     {
-      header: isLoadingBots
-        ? "connect..."
-        : bot?.setting.status
-        ? "Online"
-        : "Offline",
+      header: isLoadingBots ? "connect..." : bot?.setting.status ? "On" : "Off",
       description: "وضعیت اتصال ربات",
-      backColor: "bg-[#66BB00]",
-      iconBackColor: "bg-[#519506]",
+      backColor: "bg-[#EE8800]",
+      iconBackColor: "bg-[#BE6D05]",
       icon: "/cart/cart_4.svg",
       width: 38,
       height: 38,
@@ -83,8 +79,12 @@ export default function Dashboard() {
         ? "connect..."
         : (() => {
             const todaysVisits = botVisits
-              .filter((item) => item.date.split("/")[2] === String(time.jd + 1))
-              .reduce((acc, item) => acc + item.users.length, 0);
+              .filter((item) => {
+                return item.date.split("/")[2] === String(time.jd + 1);
+              })
+              .reduce((acc, item) => {
+                return acc + item.users.length;
+              }, 0);
 
             return todaysVisits > 0 ? todaysVisits : 0;
           })(),
@@ -92,7 +92,18 @@ export default function Dashboard() {
     },
     {
       title: "تعداد تراکنش های موفق امروز",
-      description: 0,
+      description: isLoadingTransactions
+        ? "connect..."
+        : (() => {
+            const successfulTransactions = transactions
+              .filter(
+                (transaction) =>
+                  transaction.date.split("/")[2] === String(time.jd)
+              )
+              .reduce((acc, transaction) => acc + transaction.users.length, 0);
+
+            return successfulTransactions > 0 ? successfulTransactions : 0;
+          })(),
       rounded_none: "rounded-t-none",
     },
   ];
@@ -100,7 +111,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!botVisits?.length && !transactions?.length) return;
 
-    const lastTenBotVisits = botVisits.slice(-10);
+    const lastTenBotVisits = botVisits.slice(-30);
 
     const filterBotVisit = lastTenBotVisits.map((botVisit) => {
       const matchingTransaction = transactions.find(
@@ -116,12 +127,30 @@ export default function Dashboard() {
       };
     });
 
+    // Add missing dates if necessary
+    while (filterBotVisit.length < 30) {
+      // Get the last date in the array
+      const lastDate = filterBotVisit[0].date;
+      const [jy, jm, jd] = lastDate.split("/").map(Number);
+
+      // Subtract one day from the last date
+      const newTime = subtractOneDayFromJalaali({ jy, jm, jd });
+
+      // Format the new date and add it to the beginning of the array
+      filterBotVisit.unshift({
+        telegram_views_count: 0,
+        transaction_count: 0,
+        date: `${newTime.jy}/${newTime.jm}/${newTime.jd}`,
+      });
+    }
+
+    // Set the chart data
     setChartData(filterBotVisit);
-  }, [botVisits, transactions, time.jd]);
+  }, [botVisits, transactions]);
 
   return (
     <Fragment>
-      <header className="flex justify-center gap-5">
+      <header className="flex justify-between w-full">
         {cards.map((item, index) => {
           return (
             <Card
@@ -133,7 +162,7 @@ export default function Dashboard() {
                   <div className="text-white text-[34px]">
                     <span>{item.header}</span>
                   </div>
-                  <div className="text-white/[63%] text-[18px]">
+                  <div className="text-white/[63%] text-[16.5px]">
                     <span>{item.description}</span>
                   </div>
                 </div>
@@ -158,14 +187,14 @@ export default function Dashboard() {
 
       <main>
         <section className="w-full flex justify-center">
-          <div className="w-[1065px] h-[70px] mt-5 rounded-lg flex items-center bg-[#EDEDED]">
+          <div className="w-full h-[70px] mt-5 rounded-lg flex items-center bg-[#EDEDED]">
             <span className="mr-7 text-[20px] font-medium">
               گزارشات ماه اخیر
             </span>
           </div>
         </section>
 
-        <section className="mt-3 flex gap-5 ml-auto mr-auto w-[95%]">
+        <section className="mt-3 flex gap-5 ml-auto mr-auto w-full">
           <div>
             <div className="w-[461px] h-[265px] border-[1px] rounded-[10px] border-[#D3D3D3]">
               {mainCard.map((item, index) => {
@@ -184,7 +213,7 @@ export default function Dashboard() {
                         <span>{item.title}</span>
                       </div>
                       <div>
-                        <span className="text-[50px]">{item.description}</span>
+                        <span className="text-[40px]">{item.description}</span>
                       </div>
                     </div>
 
@@ -208,9 +237,9 @@ export default function Dashboard() {
             </div>
 
             <div className="p-2">
-              <a className="flex mt-2 items-center text-[#5B0CCA]" href="#">
+              <button className="flex mt-2 items-center text-[#5B0CCA] transition-all ease-in-out duration-75 hover:text-[#2761D9]">
                 تماس با پشتیبانی اسپات سلر <ArrowLeft />
-              </a>
+              </button>
             </div>
           </div>
 

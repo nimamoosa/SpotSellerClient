@@ -68,5 +68,5 @@ export default function ManagementOfCourses() {
     }
   }, [courses, isLoadingCourse, type]);
 
-  return <div className="mt-9 mr-4 w-full h-[60vh]">{render()}</div>;
+  return <div className="mt-9 w-full h-[60vh]">{render()}</div>;
 }

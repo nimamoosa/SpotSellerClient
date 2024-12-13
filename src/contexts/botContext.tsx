@@ -55,6 +55,10 @@ export default function BotProvider({
 
       setIsLoadingBots(false);
     });
+
+    receiverEvent("getBotEventReceiverClientSetter", (data) => {
+      setBot(data.data);
+    });
   }, [user]);
 
   return (

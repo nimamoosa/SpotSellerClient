@@ -1,6 +1,6 @@
 "use client";
 
-import Alert from "@/components/alert";
+// import Alert from "@/components/alert";
 import Auth from "@/components/auth";
 import CompleteAuth from "@/components/completeAuth";
 import GetAuthCode from "@/components/getAuthCode";
@@ -13,7 +13,7 @@ import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { randomBytes } from "crypto";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -22,18 +22,28 @@ export default function Home() {
     "auth"
   );
   const router = useRouter();
+  const pathname = usePathname();
 
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { auth, code, setOpenToast, setToast, name } = useController();
+  const { auth, code, setAlert, name } = useController();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const { setBot } = useBot();
+  const { user, setUser } = useAuth();
 
   const [codeRoute, setCodeRoute] = useState("");
-  const { user, setUser } = useAuth();
+  const [botTrue, setBotTrue] = useState({
+    is: false,
+    botId: 0,
+    token: "",
+    spot_player_key: "",
+    site: { is_site: false, site_link: "" },
+    authorization_key: "",
+  });
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push(codeRoute ? `/dashboard?code=${codeRoute}` : "/dashboard");
+      pathname !== "/payment" &&
+        router.push(codeRoute ? `/dashboard?code=${codeRoute}` : "/dashboard");
     }
   }, [user, isLoading]);
 
@@ -50,8 +60,7 @@ export default function Home() {
     receiverEvent("authenticationEvent", (data) => {
       setState("submit_code");
 
-      setOpenToast(true);
-      setToast({ description: data.message });
+      setAlert({ text: data.message });
       stopLoading();
       return;
     });
@@ -60,9 +69,8 @@ export default function Home() {
       const { auth } = data;
 
       if (!data.success) {
-        setOpenToast(true);
-        setToast({
-          description: data.message,
+        setAlert({
+          text: data.message,
         });
         return;
       }
@@ -84,12 +92,16 @@ export default function Home() {
 
     receiverEvent("checkCodeEventReceiver", (data) => {
       if (!data.success) {
-        setOpenToast(true);
-        setToast({
-          description: data.message,
+        setAlert({
+          text: data.message,
         });
         stopLoading();
         return;
+      }
+
+      if (data.is_auth) {
+        setUser(data.auth_data);
+        stopLoading();
       }
 
       setState("complete_auth");
@@ -102,25 +114,41 @@ export default function Home() {
       const { success } = data;
 
       if (!success) {
-        setOpenToast(true);
-        setToast({
-          description: data.message,
+        setAlert({
+          text: data.message,
         });
         stopLoading();
         return;
       }
 
-      sendEvent("login", {
-        auth_filed: data.auth_filed,
-        name: data.name,
+      console.log(true);
+
+      setBotTrue({
+        is: true,
         botId: data.botId,
-        site: data.site,
         token: data.data.token,
+        spot_player_key: data.spot_player_key,
+        site: data.site,
+        authorization_key: data.authorization_key,
       });
     });
   }, []);
 
-  Alert();
+  useEffect(() => {
+    if (!botTrue.is) return;
+
+    sendEvent("login", {
+      auth_filed: auth,
+      name,
+      botId: botTrue.botId,
+      site: botTrue.site,
+      token: botTrue.token,
+      spot_player_key: botTrue.spot_player_key,
+      authorization_key: botTrue.authorization_key,
+    });
+  }, [botTrue, auth, name]);
+
+  // Alert();
 
   const handleSendCode = () => {
     sendEvent("authentication", { provider: "phone_number", auth_filed: auth });
@@ -134,10 +162,18 @@ export default function Home() {
 
   const handleCreateBot = (
     token: string,
-    site: { is_site: boolean; site_link: string }
+    site: { is_site: boolean; site_link: string; authorization_key: string },
+    spot_player_key: string
   ) => {
     startLoading();
-    sendEvent("createBot", { token, site, name, auth_filed: auth });
+    sendEvent("createBot", {
+      token,
+      site,
+      name,
+      auth_filed: auth,
+      spot_player_key,
+      authorization_key: site.authorization_key,
+    });
   };
 
   return (

@@ -6,6 +6,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import ViewUserProfile from "@/components/view_user_profile";
 import { useAuth } from "@/contexts/authContext";
 import { useBotSupport } from "@/contexts/botSupportContext";
+import { useController } from "@/contexts/controllerContext";
 import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { useRouter } from "next/navigation";
@@ -21,11 +22,13 @@ export default function ManualSupport() {
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
   const { support, isLoadingSupport } = useBotSupport();
+  const { setAlert } = useController();
   const { isLoading } = useLoading();
 
   useEffect(() => {
     receiverEvent("userAvailableEventReceiver", (data) => {
-      if (data.success === false) return alert(data.message);
+      if (data.success === false)
+        return setAlert({ text: data.message, type: "error" });
 
       setUserInfo(data.data);
       setOpen(true);
@@ -38,16 +41,16 @@ export default function ManualSupport() {
     setTelegramId(String(support.supportId));
   }, [support, isLoadingSupport]);
 
+  useEffect(() => {
+    if (!open) setUserInfo({});
+  }, [open]);
+
   const handleClickSet = useCallback(() => {
     if (!user) return;
     if (!telegramId) return;
 
     sendEvent("userAvailable", { userId: user.userId, telegramId });
   }, [user, telegramId]);
-
-  useEffect(() => {
-    if (!open) setUserInfo({});
-  }, [open]);
 
   return (
     <div className="flex gap-3 flex-col items-center justify-center">
@@ -58,8 +61,9 @@ export default function ManualSupport() {
         telegramId={telegramId}
       />
 
-      <div className="flex items-center justify-end w-[89%]">
+      <div className="flex items-center justify-end w-[91%]">
         <Button
+          className="border-[#D6D6D6] w-[10%] h-[6.5vh] border-2"
           onClick={() => router.back()}
           disabled={isLoadingSupport || isLoading}
         >
@@ -80,7 +84,7 @@ export default function ManualSupport() {
 
         <div>
           <LoadingButton
-            className="border-[#D6D6D6] border-2"
+            className="border-[#D6D6D6] h-[6.5vh] border-2"
             variant={"ghost"}
             onClick={handleClickSet}
             disabled={isLoadingSupport || isLoading}

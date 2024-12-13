@@ -17,15 +17,18 @@ import { useSocket } from "./socketContext";
 interface AuthContextProps {
   user: AuthType | null;
   setUser: Dispatch<SetStateAction<AuthType | null>>;
+  loadingAuth: boolean;
 }
 
 const AuthContext = createContext<AuthContextProps>({
   user: null,
   setUser: () => {},
+  loadingAuth: true,
 });
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthType | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
   const { startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
@@ -49,11 +52,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     receiverEvent("getAuthEventReceiver", (data) => {
-      if (!data.success) return stopLoading();
-
-      return setUser(data.data);
+      if (data.success == false) {
+        setLoadingAuth(false);
+        setUser(null);
+      } else {
+        setLoadingAuth(false);
+        setUser(data.data);
+      }
     });
-  }, []);
+  }, [stopLoading]);
 
   useEffect(() => {
     if (!user) return;
@@ -73,7 +80,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, [isReconnect, user, clientId]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, loadingAuth }}>
       {children}
     </AuthContext.Provider>
   );

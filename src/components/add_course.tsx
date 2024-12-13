@@ -18,6 +18,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { randomBytes } from "crypto";
+import { BsShop } from "react-icons/bs";
+import AmountInput from "./amount_input";
+import { useController } from "@/contexts/controllerContext";
 
 const CHUNK_SIZE = 1024 * 1024;
 
@@ -26,21 +30,26 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     title: string;
     course_id: string;
     description: string;
+    amount: string;
   }>({
     title: "",
     course_id: "",
     description: "",
+    amount: "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [progress, setProgress] = useState(0);
-  const [showImage, setShowImage] = useState(false);
   const [downloadLink, setDownloadLink] = useState("");
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertType, setAlertType] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { setCourses, courses } = useCourse();
   const { user } = useAuth();
+  const { setAlert } = useController();
 
   useEffect(() => {
     receiverEvent("uploadFileEventReceiver", (data) => {
@@ -78,13 +87,15 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
         title: values.title,
         description: values.description,
         media_url: downloadLink,
+        discount_code: discountCode,
+        amount: values.amount,
       },
       botId: user.botId,
       userId: user.userId,
     });
 
     setDownloadLink("");
-  }, [downloadLink, user, values]);
+  }, [downloadLink, user, values, discountCode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
@@ -134,7 +145,6 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
             botId,
             type: "profile",
             name,
-            another_data: values,
           };
 
           // Send the chunk to the server via Socket.IO
@@ -170,25 +180,54 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
 
   return (
     <form
-      className=""
+      className="-mt-10"
       onSubmit={(e) => {
         e.preventDefault();
 
         if (selectedFile === null)
-          return alert("شما باید حداقل یک عکس اضافه کنید");
+          return setAlert({
+            text: "شما باید حداقل یک عکس اضافه کنید",
+            type: "warning",
+          });
 
         startLoading();
 
         return uploadFile(selectedFile, "nima", user?.userId, user?.botId);
       }}
     >
-      <AlertDialog open={showImage} onOpenChange={setShowImage}>
+      <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle></AlertDialogTitle>
-            <AlertDialogDescription className="w-full">
-              <img className="w-full rounded-lg" src={preview} alt="" />
-            </AlertDialogDescription>
+            <div className="w-full" suppressHydrationWarning>
+              {alertType === "preview_image" ? (
+                <img className="w-full rounded-lg" src={preview} alt="" />
+              ) : (
+                <div>
+                  <div>
+                    <Input
+                      maxLength={30}
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value)}
+                      placeholder="کد تخفیف مد نظر خود را وارد کنید"
+                    />
+                  </div>
+
+                  <div className="mt-5">
+                    <Button
+                      variant={"secondary"}
+                      onClick={() =>
+                        setDiscountCode(
+                          randomBytes(30).toString("hex").slice(0, 30)
+                        )
+                      }
+                    >
+                      ساخت کد تخفیف
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>بستن</AlertDialogCancel>
@@ -205,7 +244,10 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
                   src={preview}
                   alt="course_photo"
                   className="rounded-lg object-cover cursor-pointer w-[100px] h-[55px]"
-                  onClick={() => setShowImage(true)}
+                  onClick={() => {
+                    setOpenAlert(true);
+                    setAlertType("preview_image");
+                  }}
                 />
               ) : (
                 <span className="text-[18px] w-full text-[#7D7D7D]">
@@ -244,8 +286,8 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
         </header>
       </section>
 
-      <section className="mt-5">
-        <div className="flex justify-between mb-5">
+      <section className="mt-2">
+        <div className="flex justify-between mb-2">
           <div>
             <Input
               placeholder="عنوان دوره"
@@ -269,6 +311,13 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
           </div>
         </div>
 
+        <div className="mb-2">
+          <AmountInput
+            onChange={(v) => setValues({ ...values, amount: v })}
+            value={values.amount}
+          />
+        </div>
+
         <div className="flex items-center justify-center">
           <Textarea
             className="w-[1146px] h-[292px] border-[#D6D6D6] border-2 resize-none"
@@ -283,24 +332,41 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
         </div>
 
         <div className="mt-4 flex items-center justify-end">
-          <Button
-            variant={"ghost"}
-            className="border-[#D6D6D6] border-2 w-[155px] h-[45px] text-[18px]"
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              progress > 100 ? (
-                `${progress} درحال آپلود عکس`
+          <div className="ml-5">
+            <Button
+              variant={"ghost"}
+              className="border-[#D6D6D6] bg-black/20 border-2 w-[100%] h-[45px] text-[16px]"
+              type="button"
+              disabled={isLoading}
+              onClick={() => {
+                setOpenAlert(true);
+                setAlertType("discount_code");
+              }}
+            >
+              <BsShop /> اعمال کد نخفیف
+            </Button>
+          </div>
+
+          <div>
+            <Button
+              variant={"ghost"}
+              className="border-[#D6D6D6] border-2 w-[100%] h-[45px] text-[16px]"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                progress > 100 ? (
+                  `${progress} درحال آپلود عکس`
+                ) : (
+                  "درحال ارسال"
+                )
               ) : (
-                "درحال ارسال"
-              )
-            ) : (
-              <>
-                <span className="text-[18px] font-bold">+</span> افزودن دوره
-              </>
-            )}
-          </Button>
+                <>
+                  <span className="text-[18px] font-bold">+</span> افزودن دوره
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </section>
     </form>

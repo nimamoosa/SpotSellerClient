@@ -9,7 +9,14 @@ export default function Auth({ onClick }: { onClick: () => void }) {
   const { auth, setAuth, isLoading } = useController();
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-white">
+    <form
+      className="w-full h-full flex flex-col items-center justify-center bg-white"
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        onClick();
+      }}
+    >
       <div className="flex justify-center w-full">
         <div className="w-[80%] mb-5 font-semibold text-[28px]">
           <p>ورود یا عضویت</p>
@@ -30,13 +37,13 @@ export default function Auth({ onClick }: { onClick: () => void }) {
         <LoadingButton
           dir="ltr"
           className="w-[80%] rounded-lg h-[58px] text-[18px]"
-          onClick={onClick}
           disabled={!auth || auth.length !== 11}
           loading={isLoading}
+          type="submit"
         >
           ارسال کد تایید
         </LoadingButton>
       </div>
-    </div>
+    </form>
   );
 }

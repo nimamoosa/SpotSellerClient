@@ -58,13 +58,13 @@ export default function GeneralSettings() {
       // Update botInfo state
       setBotInfo((prev) => ({ ...prev, ...updatedFields }));
     });
-  }, [setBotInfo, name, bio, description]);
+  }, [name, bio, description]);
 
   const updated = useCallback(() => {
     if (!user) return;
-    if (!name) return;
-    if (!bio) return;
-    if (!description) return;
+    // if (!name) return;
+    // if (!bio) return;
+    // if (!description) return;
     if (!bot) return;
 
     const data = {};

@@ -25,7 +25,7 @@ export default function Layout({
   const tabs: Tab[] = [
     {
       label: "تنظیمات ربات",
-      href: "/dashboard/panel_setting/robot_settings",
+      href: "/dashboard/panel_setting",
       segment: "robot_settings",
     },
     {
@@ -95,7 +95,7 @@ export default function Layout({
           </div>
         </div>
       ) : (
-        <div className="mt-5 w-[95%] ml-auto mr-auto">{children}</div>
+        <div className="mt-10 w-[99%] ml-auto mr-auto">{children}</div>
       )}
     </div>
   );

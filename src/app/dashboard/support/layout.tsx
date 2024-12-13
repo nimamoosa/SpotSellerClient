@@ -12,10 +12,10 @@ export default function Layout({
   const pathname = usePathname();
 
   return pathname === "/dashboard/support" ? (
-    <main className="flex items-center justify-evenly w-full">
+    <main className="flex items-center justify-between w-full">
       <Link
         href="/dashboard/support/manual_support"
-        className="w-[45%] flex items-center justify-end"
+        className="w-[48%] flex items-center justify-end"
       >
         <div className="w-full h-[330px] rounded-lg flex flex-col items-center justify-center transition-all bg-[#F6F6F6] hover:bg-[#E5E5E5]">
           <img src="/icons/ellipsis.message.fill 1.svg" alt="" />
@@ -28,7 +28,7 @@ export default function Layout({
 
       <Link
         href="/dashboard/support/ai_support"
-        className="w-[45%] flex items-center justify-start"
+        className="w-[48%] flex items-center justify-start"
       >
         <div className="w-full h-[330px] rounded-lg flex flex-col items-center justify-center transition-all bg-[#F6F6F6] hover:bg-[#E5E5E5]">
           <img src="/icons/AI.svg" alt="" />

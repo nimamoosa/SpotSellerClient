@@ -60,7 +60,7 @@ export default function MainLayout({
     {
       hover_icon: <img src="/icons/cart_shop_hover.svg" />,
       out_icon: <img src="/icons/cart_shop.svg" />,
-      href: "/dashboard/financial_arrangements",
+      href: "/dashboard/finance_settings",
       text: "تنظیمات مالی",
     },
     {
@@ -78,7 +78,7 @@ export default function MainLayout({
   ];
 
   return (
-    <div className="flex flex-row overflow-hidden w-full max-w-[1600px] h-[100vh] font-sans border-black/10 bg-[#F5EEFF]">
+    <div className="flex flex-row overflow-hidden w-full h-[100vh] font-sans border-black/10 bg-[#F5EEFF]">
       <section className="w-[25%]">
         <aside className="w-full">
           <div className="flex justify-end mt-5">
@@ -177,10 +177,10 @@ export default function MainLayout({
             </div>
           </section>
           <section>
-            <div className="ml-12">
+            <div>
               <Button
                 variant={"ghost"}
-                className="flex items-center justify-center gap-2 text-[18px]"
+                className="flex items-center justify-center gap-2 text-[18px] focus-visible:bg-transparent hover:bg-transparent hover:text-red-500"
               >
                 خروج از حساب
               </Button>
@@ -189,8 +189,8 @@ export default function MainLayout({
         </header>
 
         <main className="w-full h-[95%] rounded-tr-[37px] bg-white p-3">
-          <section slot="top" className="mr-3 h-[10vh]">
-            <div className="flex items-center text-xl font-semibold mb-5 p-5">
+          <section slot="top" className="mr-1 h-[10vh]">
+            <div className="flex items-center w-[97%] h-[8vh] ml-auto mr-auto text-xl font-semibold mb-5">
               پنل ناشر <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
               <span>
                 {buttons.find((button) => button.href === pathname)?.text || ""}
@@ -198,7 +198,10 @@ export default function MainLayout({
             </div>
           </section>
 
-          <section className="w-[97%] h-[90%]" suppressHydrationWarning>
+          <section
+            className="w-[97%] h-[90%] ml-auto mr-auto"
+            suppressHydrationWarning
+          >
             {children}
           </section>
         </main>

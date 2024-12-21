@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  user-select: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   --wd-text-font: "IRANSansXVF", IRANSansX, "Times New Roman", Roboto, Ubuntu,
     sans-serif !important;

@@ -78,7 +78,7 @@ export default function ShowCourse({
               return (
                 <TableRow className="hover:bg-transparent" key={index}>
                   <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
-                    <p className="mr-4">{item.title}</p>
+                    <p className="mr-5">{item.title}</p>
                   </TableCell>
                   <TableCell className="flex justify-center">
                     <div className="ml-2">

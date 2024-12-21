@@ -17,7 +17,7 @@ export default function ToggleButton({
   active: boolean;
   active_text: string;
   inactive_text: string;
-  onClick: () => void;
+  onClick?: () => void;
   active_class?: string;
   inactive_class?: string;
 }) {

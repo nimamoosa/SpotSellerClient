@@ -151,5 +151,5 @@ export default function ManagementUsers() {
     );
   }, [userClick, registeredUsers, setUserClick]);
 
-  return renderPage();
+  return <main className="h-full overflow-auto">{renderPage()}</main>;
 }

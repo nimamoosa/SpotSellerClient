@@ -10,7 +10,7 @@ export default function Auth({ onClick }: { onClick: () => void }) {
 
   return (
     <form
-      className="w-full h-full flex flex-col items-center justify-center bg-white"
+      className="w-full h-full flex flex-col items-center justify-center"
       onSubmit={(e) => {
         e.preventDefault();
 
@@ -30,6 +30,7 @@ export default function Auth({ onClick }: { onClick: () => void }) {
           value={auth}
           onChange={(e) => setAuth(e.target.value)}
           maxLength={11}
+          dir={auth ? "ltr" : "rtl"}
         />
       </div>
 

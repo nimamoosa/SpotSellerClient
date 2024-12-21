@@ -14,7 +14,7 @@ import {
 } from "react";
 
 // Create a single socket instance outside the component
-const socketInstance = io("http://api.spotseller.ir/websocket", {
+const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   transports: ["websocket"],
   reconnection: true,
   // port: 3000,
@@ -51,16 +51,14 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
     const socket = socketRef.current;
 
     socket.on("connect", () => {
-      console.log("Connected to WebSocket server:", socket.id);
-
       socketInstance.emit("register", { clientId: id });
 
       setIsReconnect(true);
     });
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server");
-    });
+    // socket.on("disconnect", () => {
+    //   console.log("Disconnected from WebSocket server");
+    // });
 
     return () => {
       socket.off("connect");

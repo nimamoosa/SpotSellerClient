@@ -122,6 +122,7 @@ export default function FinanceSettings() {
 
         <div className="mt-5">
           <Input
+            dir={values?.zarinpal ? "ltr" : "rtl"}
             className="h-[6.5vh] border-2 border-[#D6D6D6] rounded-lg w-[95%]"
             placeholder="مرچنت زرین پال خود را وارد کنید"
             value={values?.zarinpal || ""}
@@ -159,8 +160,9 @@ export default function FinanceSettings() {
 
         <div className="mt-5">
           <Input
+            dir={values?.cart_by_cart ? "ltr" : "rtl"}
             className="h-[6.5vh] border-2 border-[#D6D6D6] rounded-lg w-[95%]"
-            placeholder="مرچنت زرین پال خود را وارد کنید"
+            placeholder="شماره کارت خود را وارد کنید"
             value={values?.cart_by_cart || ""}
             onChange={(e) =>
               setValues({

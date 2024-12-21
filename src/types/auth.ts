@@ -20,4 +20,9 @@ export type AuthType = {
       util: Date;
     };
   };
+  site: {
+    is_site: boolean;
+    site_link: string;
+    authorization_key: string;
+  };
 };

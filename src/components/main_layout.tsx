@@ -3,8 +3,11 @@
 import DashboardButton from "@/components/dashboard_button";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/authContext";
+import { useController } from "@/contexts/controllerContext";
+import useLoading from "@/hooks/useLoading";
+import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { usePathname } from "next/navigation"; // Import usePathname
-import { ReactNode, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 
 export default function MainLayout({
@@ -13,7 +16,23 @@ export default function MainLayout({
   const pathname = usePathname(); // Get the current path
   const [hover, setHover] = useState<number>(-1);
 
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const { isLoading, startLoading, stopLoading } = useLoading();
+  const { sendEvent, receiverEvent } = useSocketRequest();
+  const { setAlert } = useController();
+
+  useEffect(() => {
+    receiverEvent("logoutEventReceiver", (data) => {
+      stopLoading();
+
+      if (!data.success) {
+        setAlert({ text: data.message, type: "error" });
+        return;
+      }
+
+      setUser(null);
+    });
+  }, []);
 
   const buttons: {
     hover_icon: ReactNode;
@@ -70,15 +89,22 @@ export default function MainLayout({
       text: "تنظیمات پنل",
     },
     {
-      hover_icon: <img src="/icons/wordpress.svg" />,
+      hover_icon: <img src="/icons/wordpress_hover.svg" />,
       out_icon: <img src="/icons/wordpress.svg" />,
       href: "/dashboard/connect_to_wordpress",
       text: "اتصال به وردپرس",
     },
   ];
 
+  const handleSubmit = useCallback(() => {
+    if (!user) return;
+
+    startLoading();
+    sendEvent("logout", { userId: user.userId });
+  }, [user]);
+
   return (
-    <div className="flex flex-row overflow-hidden w-full h-[100vh] font-sans border-black/10 bg-[#F5EEFF]">
+    <div className="flex flex-row overflow-hidden w-full h-[100vh] border-black/10 bg-[#F5EEFF]">
       <section className="w-[25%]">
         <aside className="w-full">
           <div className="flex justify-end mt-5">
@@ -172,7 +198,8 @@ export default function MainLayout({
           <section className="flex gap-5">
             <div>
               <span className="font-bold font_sa text-xl" dir="ltr">
-                عزیز, خوش اومدی 👋 {user?.name}
+                👋 <span className="font-semibold">{user?.name}</span> عزیز, خوش
+                اومدی
               </span>
             </div>
           </section>
@@ -181,6 +208,9 @@ export default function MainLayout({
               <Button
                 variant={"ghost"}
                 className="flex items-center justify-center gap-2 text-[18px] focus-visible:bg-transparent hover:bg-transparent hover:text-red-500"
+                onClick={handleSubmit}
+                type="button"
+                disabled={isLoading}
               >
                 خروج از حساب
               </Button>
@@ -188,7 +218,7 @@ export default function MainLayout({
           </section>
         </header>
 
-        <main className="w-full h-[95%] rounded-tr-[37px] bg-white p-3">
+        <main className="w-full h-[90%] max-h-[89%] rounded-tr-[37px] bg-white p-3">
           <section slot="top" className="mr-1 h-[10vh]">
             <div className="flex items-center w-[97%] h-[8vh] ml-auto mr-auto text-xl font-semibold mb-5">
               پنل ناشر <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}

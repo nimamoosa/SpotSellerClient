@@ -10,15 +10,18 @@ import BotVisitProvider from "@/contexts/botVisitContext";
 import RegisteredUsersProvider from "@/contexts/registeredUsersContext";
 import TransactionProvider from "@/contexts/transactionContext";
 import BotSupportProvider from "@/contexts/botSupportContext";
-import "./globals.css";
 import MainResponsive from "@/components/main_responsive";
 import LicenseProvider from "@/contexts/licenseContext";
 import PaymentProvider from "@/contexts/paymentContext";
+import FileProvider from "@/contexts/fileContext";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Spot Seller - اسپات سلر",
   description: "سرویس مدیریت اسپات پلیر",
-  // icons: "/icon.svg",
+  icons: "/icon.svg",
 };
 
 export default function RootLayout({
@@ -42,12 +45,16 @@ export default function RootLayout({
                         <TransactionProvider>
                           <LicenseProvider>
                             <PaymentProvider>
-                              <ControllerProvider>
-                                <MainResponsive>
-                                  {children}
-                                  <Toaster />
-                                </MainResponsive>
-                              </ControllerProvider>
+                              <FileProvider>
+                                <ControllerProvider>
+                                  <MainResponsive>
+                                    {children}
+                                    <Toaster />
+                                    <Analytics />
+                                    <SpeedInsights />
+                                  </MainResponsive>
+                                </ControllerProvider>
+                              </FileProvider>
                             </PaymentProvider>
                           </LicenseProvider>
                         </TransactionProvider>

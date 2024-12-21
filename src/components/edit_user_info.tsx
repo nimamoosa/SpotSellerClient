@@ -76,8 +76,8 @@ export default function EditUserInfo({
         <div className="w-full flex items-center justify-between">
           <div className="w-[50%] flex items-center justify-center">
             <Input
-              className="w-[95%] h-[6vh] rounded-lg border-2 border-[#D6D6D6]"
-              placeholder={values.name}
+              className="w-[95%] h-[6.5vh] rounded-lg border-2 border-[#D6D6D6]"
+              placeholder={"اسم کاربر"}
               onChange={(e) => setValues({ ...values, name: e.target.value })}
               value={values.name}
             />
@@ -85,12 +85,16 @@ export default function EditUserInfo({
 
           <div className="w-[50%] flex items-center justify-center">
             <Input
-              className="w-[95%] h-[6vh] rounded-lg border-2 border-[#D6D6D6]"
-              placeholder={values.phone_number}
-              onChange={(e) =>
-                setValues({ ...values, phone_number: e.target.value })
-              }
+              className="w-[95%] h-[6.5vh] rounded-lg border-2 border-[#D6D6D6]"
+              placeholder={"شماره موبایل کاربر"}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^[0-9]*$/.test(value)) {
+                  setValues({ ...values, phone_number: value });
+                }
+              }}
               value={values.phone_number}
+              maxLength={11}
             />
           </div>
         </div>
@@ -100,8 +104,11 @@ export default function EditUserInfo({
             variant={"ghost"}
             className="rounded-lg border-2 border-[#D6D6D6]"
             disabled={
-              values.name === userClick?.name &&
-              values.phone_number === userClick?.phone_number
+              (values.name === userClick?.name &&
+                values.phone_number === userClick?.phone_number) ||
+              values.name === "" ||
+              values.phone_number === "" ||
+              values.phone_number.length !== 11
             }
             loading={isLoading}
             onClick={handleSubmit}

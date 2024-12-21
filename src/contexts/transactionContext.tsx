@@ -39,17 +39,17 @@ export default function TransactionProvider({
   useEffect(() => {
     if (!user) return;
 
-    sendEvent("getTransactions", { botId: user.userId });
+    sendEvent("getTransactions", { botId: user.botId });
   }, [user]);
 
   useEffect(() => {
     receiverEvent("getTransactionsEventReceiver", (data) => {
       if (!data.success) return setIsLoadingTransaction(false);
 
-      setTransactions(data.transactions);
+      setTransactions(data.data?.transactions || data.data);
       setIsLoadingTransaction(false);
     });
-  }, []);
+  }, [receiverEvent]);
 
   return (
     <TransactionContext.Provider

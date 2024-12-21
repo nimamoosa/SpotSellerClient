@@ -95,7 +95,7 @@ export default function PaymentPage() {
 
   if (loadingCreatedLink) {
     return (
-      <div>
+      <div className="flex items-center justify-center h-full">
         <p>درحال ساخت لینک پرداخت....</p>
       </div>
     );

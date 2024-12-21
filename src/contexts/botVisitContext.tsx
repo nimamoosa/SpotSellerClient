@@ -21,7 +21,7 @@ interface BotVisitContextProps {
 const BotVisitContext = createContext<BotVisitContextProps>({
   botVisits: [],
   setBotVisits: () => {},
-  isLoadingBotVisits: false,
+  isLoadingBotVisits: true,
 });
 
 export default function BotVisitProvider({
@@ -31,7 +31,7 @@ export default function BotVisitProvider({
 }) {
   const [botVisits, setBotVisits] = useState<BotVisitType[]>([]);
 
-  const [isLoadingBotVisits, setIsLoadingBotVisits] = useState(false);
+  const [isLoadingBotVisits, setIsLoadingBotVisits] = useState(true);
 
   const { user } = useAuth();
 
@@ -46,7 +46,6 @@ export default function BotVisitProvider({
   useEffect(() => {
     receiverEvent("getBotVisitEventReceiver", (data) => {
       if (!data.success) return setIsLoadingBotVisits(false);
-      if (!data?.visit?.users_visit) return setIsLoadingBotVisits(false);
 
       setBotVisits(data?.visit?.users_visit);
       setIsLoadingBotVisits(false);

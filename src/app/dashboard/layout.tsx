@@ -12,10 +12,13 @@ function InnerComponent() {
   const code = searchParams.get("code");
   const router = useRouter();
   const { setAlert } = useController();
+  const { stopLoading } = useLoading();
   const { user, loadingAuth } = useAuth();
 
   useEffect(() => {
     if (!code) return;
+
+    stopLoading();
 
     if (code === "200") {
       setAlert({

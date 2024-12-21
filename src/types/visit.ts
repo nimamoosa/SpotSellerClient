@@ -7,6 +7,7 @@ export type TransactionUsersType = {
   userId: number;
   name: string;
   amount: string;
+  type: "success" | "cancel" | "in_progress";
 };
 
 export type BotVisitType = {

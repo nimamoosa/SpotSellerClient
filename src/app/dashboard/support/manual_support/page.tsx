@@ -87,7 +87,7 @@ export default function ManualSupport() {
             className="border-[#D6D6D6] h-[6.5vh] border-2"
             variant={"ghost"}
             onClick={handleClickSet}
-            disabled={isLoadingSupport || isLoading}
+            disabled={!telegramId || isLoadingSupport || isLoading}
           >
             اعمال آیدی
           </LoadingButton>

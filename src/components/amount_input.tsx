@@ -1,23 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 
 type AmountInputProps = {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
 };
 
-export default function AmountInput({ value, onChange }: AmountInputProps) {
+export default function AmountInput({
+  value,
+  onChange,
+  placeholder,
+}: AmountInputProps) {
+  // Function to remove all non-digit characters
+  const removeFormatting = (input: string) => input.replace(/\D/g, "");
+
   // Function to format the amount with comma separator for display
   const formatValue = (input: string) => {
-    // Remove all non-digit characters
-    const cleanInput = input.replace(/\D/g, "");
-
-    // Add comma separator every 3 digits
+    const cleanInput = removeFormatting(input);
     return cleanInput.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatValue(e.target.value);
-    onChange(formattedValue);
+    const inputValue = e.target.value;
+
+    // Remove formatting for saving raw value
+    const cleanValue = removeFormatting(inputValue);
+
+    // Prevent leading zero
+    if (cleanValue.startsWith("0") && cleanValue.length >= 1) {
+      return; // Prevent updating state if input starts with leading zero
+    }
+
+    // Pass clean value (without commas) to onChange
+    onChange(cleanValue);
   };
 
   return (
@@ -25,10 +40,10 @@ export default function AmountInput({ value, onChange }: AmountInputProps) {
       <input
         type="text"
         className="w-full h-[62px] rounded-[10px] border-[#D6D6D6] border-2 text-end pr-4 pl-[60px]"
-        placeholder="0"
+        placeholder={placeholder || "0"}
         inputMode="numeric"
-        // pattern="\d*"
         required
+        // Format value with commas for display only
         value={formatValue(value)}
         onChange={handleChange}
       />

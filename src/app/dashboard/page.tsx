@@ -31,7 +31,13 @@ export default function Dashboard() {
 
   const cards = [
     {
-      header: isLoadingTransactions ? "connect...." : transactions?.length,
+      header: isLoadingTransactions
+        ? "connect...."
+        : transactions.filter(
+            (item) =>
+              item.date.split("/")[1] === time.jm.toString() &&
+              item.users.some((user) => user.type === "success")
+          ).length,
       description: "تراکنش در این ماه",
       backColor: "bg-[#6611DD]",
       iconBackColor: "bg-[#510EB1]",
@@ -79,8 +85,8 @@ export default function Dashboard() {
         ? "connect..."
         : (() => {
             const todaysVisits = botVisits
-              .filter((item) => {
-                return item.date.split("/")[2] === String(time.jd + 1);
+              ?.filter((item) => {
+                return item.date.split("/")[2] === String(time.jd);
               })
               .reduce((acc, item) => {
                 return acc + item.users.length;
@@ -98,7 +104,8 @@ export default function Dashboard() {
             const successfulTransactions = transactions
               .filter(
                 (transaction) =>
-                  transaction.date.split("/")[2] === String(time.jd)
+                  transaction.date.split("/")[2] === String(time.jd) &&
+                  transaction.users.some((user) => user.type === "success") // بررسی درون users
               )
               .reduce((acc, transaction) => acc + transaction.users.length, 0);
 
@@ -113,30 +120,36 @@ export default function Dashboard() {
 
     const lastTenBotVisits = botVisits.slice(-30);
 
-    const filterBotVisit = lastTenBotVisits.map((botVisit) => {
-      const matchingTransaction = transactions.find(
-        (transaction) => transaction.date === botVisit.date
-      );
+    const filterBotVisit = lastTenBotVisits
+      .map((botVisit) => {
+        if (!botVisit?.date) return null;
 
-      return {
-        telegram_views_count: botVisit.users.length,
-        transaction_count: matchingTransaction
-          ? matchingTransaction.users.length
-          : 0,
-        date: botVisit.date,
-      };
-    });
+        const matchingTransaction = transactions.find(
+          (transaction, index) =>
+            transaction?.date?.split("/")[1] === botVisit.date.split("/")[1] &&
+            transaction.users[index].type === "success"
+        );
+
+        return {
+          telegram_views_count: botVisit.users?.length || 0,
+          transaction_count: matchingTransaction
+            ? matchingTransaction.users?.length || 0
+            : 0,
+          date: botVisit.date,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null); // حذف مقادیر null
 
     // Add missing dates if necessary
     while (filterBotVisit.length < 30) {
-      // Get the last date in the array
-      const lastDate = filterBotVisit[0].date;
+      const lastDate = filterBotVisit[0]?.date;
+
+      if (!lastDate) break;
+
       const [jy, jm, jd] = lastDate.split("/").map(Number);
 
-      // Subtract one day from the last date
       const newTime = subtractOneDayFromJalaali({ jy, jm, jd });
 
-      // Format the new date and add it to the beginning of the array
       filterBotVisit.unshift({
         telegram_views_count: 0,
         transaction_count: 0,
@@ -145,7 +158,7 @@ export default function Dashboard() {
     }
 
     // Set the chart data
-    setChartData(filterBotVisit);
+    setChartData(filterBotVisit); // اکنون آرایه فقط شامل اشیاء معتبر است
   }, [botVisits, transactions]);
 
   return (

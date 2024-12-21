@@ -3,7 +3,7 @@
 import { CourseType } from "@/types/course";
 import { Button } from "./ui/button";
 import { ArrowLeft, Minus, Plus } from "lucide-react";
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import {
   Drawer,
   DrawerClose,

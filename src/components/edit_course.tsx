@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/authContext";
 import { useCourse } from "@/contexts/courseContext";
 import {
   AlertDialog,
+  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -20,6 +21,7 @@ import {
 import { randomBytes } from "crypto";
 import { BsShop } from "react-icons/bs";
 import AmountInput from "./amount_input";
+import { useFile } from "@/contexts/fileContext";
 
 export default function EditCourse({
   course,
@@ -32,12 +34,12 @@ export default function EditCourse({
     title: string;
     course_id: string;
     description: string;
-    amount: string;
+    amount: number;
   }>({
     title: "",
     course_id: "",
     description: "",
-    amount: "",
+    amount: 0,
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
@@ -47,12 +49,14 @@ export default function EditCourse({
   const [isUploaded, setIsUploaded] = useState(false);
   const [alertType, setAlertType] = useState("");
   const [discountCode, setDiscountCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
   const [parameters, setParameters] = useState(false);
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { setCourses, courses } = useCourse();
   const { user } = useAuth();
+  const { fileUrls, setFileUrls } = useFile();
 
   useEffect(() => {
     receiverEvent("editCourseEventReceiver", (data) => {
@@ -72,10 +76,21 @@ export default function EditCourse({
       title: course.title,
       amount: course.amount,
     });
-    setPreview(course.media_url);
-    setDiscountCode(course.discount_code);
+    setDiscountCode(course.discount.code);
+    setDiscountAmount(course.discount.amount);
     setParameters(true);
   }, [course, discountCode, parameters]);
+
+  useEffect(() => {
+    if (!fileUrls?.length) return;
+    if (!course) return;
+
+    console.log(course, fileUrls);
+
+    setPreview(
+      fileUrls.find((file) => file.controllerId === course._id)?.file || ""
+    );
+  }, [fileUrls, course]);
 
   useEffect(() => {
     receiverEvent("uploadFileEventReceiver", (data) => {
@@ -96,6 +111,9 @@ export default function EditCourse({
     receiverEvent("deleteFileEventReceiver", (data) => {
       if (data.success === false) return;
 
+      setFileUrls((prev) =>
+        prev.filter((file) => file.controllerId !== data._id)
+      );
       setIsUploaded(true);
     });
   }, []);
@@ -122,6 +140,10 @@ export default function EditCourse({
       courseId: values.course_id,
       amount: values.amount,
       media_url: downloadLink,
+      discount: {
+        code: discountCode,
+        amount: discountAmount,
+      },
     });
 
     sendEvent("editCourse", {
@@ -131,7 +153,7 @@ export default function EditCourse({
     });
 
     setDownloadLink("");
-  }, [downloadLink, user, values, course]);
+  }, [downloadLink, user, values, course, discountAmount, discountCode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
@@ -222,9 +244,10 @@ export default function EditCourse({
       course_id === course?.courseId &&
       description === course?.description &&
       title === course?.title &&
-      preview === course.media_url &&
-      discountCode == course.discount_code &&
-      amount === course.amount
+      fileUrls.some((item) => item.file === preview) &&
+      amount === course.amount &&
+      discountCode == course.discount?.code &&
+      discountAmount === course.discount.amount
     );
   };
 
@@ -241,7 +264,10 @@ export default function EditCourse({
       courseId: values.course_id,
       media_url: course.media_url,
       amount: values.amount,
-      discount_code: discountCode,
+      discount: {
+        code: discountCode,
+        amount: discountAmount,
+      },
     });
 
     sendEvent("editCourse", {
@@ -249,70 +275,113 @@ export default function EditCourse({
       _id: course._id,
       updatedCourseData,
     });
-  }, [user, values, course, discountCode]);
+  }, [user, values, course, discountCode, discountAmount]);
 
   return (
     <form
-      className="-mt-10"
       onSubmit={(e) => {
         e.preventDefault();
 
         startLoading();
 
         if (selectedFile) {
-          return sendEvent("deleteFile", { downloadLink: course?.media_url });
+          return sendEvent("deleteFile", {
+            downloadLink: course?.media_url,
+            _id: course?._id,
+          });
         }
 
         return handleSubmit();
       }}
     >
       <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
-        <AlertDialogContent suppressHydrationWarning>
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle></AlertDialogTitle>
-            <div className="w-full">
+            <AlertDialogTitle className="text-start">
+              {alertType === "preview_image"
+                ? "پیش نمایش عکس"
+                : "ساخت کد تخفیف"}
+            </AlertDialogTitle>
+            <div className="w-full" suppressHydrationWarning>
               {alertType === "preview_image" ? (
                 <img className="w-full rounded-lg" src={preview} alt="" />
               ) : (
                 <div>
-                  <div>
+                  <div className="flex flex-col gap-5">
                     <Input
+                      className="w-full h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
                       maxLength={30}
                       value={discountCode}
                       onChange={(e) => setDiscountCode(e.target.value)}
                       placeholder="کد تخفیف مد نظر خود را وارد کنید"
                     />
-                  </div>
 
-                  <div className="mt-5 flex items-center justify-end gap-5">
-                    <div>
-                      <Button
-                        variant={"destructive"}
-                        onClick={() => setDiscountCode("")}
-                      >
-                        حذف کد تخفیف
-                      </Button>
-                    </div>
-
-                    <div>
-                      <Button
-                        variant={"secondary"}
-                        onClick={() =>
-                          setDiscountCode(
-                            randomBytes(30).toString("hex").slice(0, 30)
-                          )
-                        }
-                      >
-                        ساخت کد تخفیف
-                      </Button>
-                    </div>
+                    <AmountInput
+                      value={discountAmount !== 0 ? String(discountAmount) : ""}
+                      onChange={(value) => setDiscountAmount(Number(value))}
+                      placeholder="مبلغ کد تخفیف را وارد کنید"
+                    />
                   </div>
                 </div>
               )}
             </div>
           </AlertDialogHeader>
+
           <AlertDialogFooter>
-            <AlertDialogCancel>بستن</AlertDialogCancel>
+            <div
+              className={`w-[35%] flex flex-col items-end ${
+                alertType !== "preview_image"
+                  ? "bg-black/30 p-2 shadow-2xl"
+                  : "bg-transparent"
+              } rounded-lg`}
+            >
+              {alertType !== "preview_image" && (
+                <div className="w-full flex items-center justify-center mb-2">
+                  <Button
+                    variant={"secondary"}
+                    onClick={() =>
+                      setDiscountCode(
+                        randomBytes(30).toString("hex").slice(0, 30)
+                      )
+                    }
+                    className="w-full"
+                  >
+                    ساخت کد تخفیف
+                  </Button>
+                </div>
+              )}
+
+              <div
+                className={`flex ${
+                  alertType !== "preview_image"
+                    ? "justify-between"
+                    : "justify-end"
+                } w-full`}
+              >
+                <AlertDialogCancel
+                  className="w-[45%]"
+                  onClick={() => {
+                    if (alertType !== "preview_image") {
+                      setDiscountAmount(0);
+                      setDiscountCode("");
+                    }
+                  }}
+                >
+                  بستن
+                </AlertDialogCancel>
+
+                {alertType !== "preview_image" && (
+                  <>
+                    <AlertDialogAction
+                      className="w-[45%]"
+                      disabled={discountAmount === 0 || discountCode === ""}
+                    >
+                      افزودن
+                    </AlertDialogAction>
+                  </>
+                )}
+              </div>
+            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -396,10 +465,9 @@ export default function EditCourse({
         <div className="mb-2">
           <AmountInput
             onChange={(v) => {
-              setValues({ ...values, amount: v });
-              console.log(v);
+              setValues({ ...values, amount: Number(v) });
             }}
-            value={values.amount}
+            value={String(values.amount)}
           />
         </div>
 
@@ -429,7 +497,7 @@ export default function EditCourse({
               }}
             >
               <BsShop />{" "}
-              {course?.discount_code ? "تغییر کد تخفیف" : "افزودن کد تخفیف"}
+              {course?.discount.code ? "تغییر کد تخفیف" : "افزودن کد تخفیف"}
             </Button>
           </div>
 

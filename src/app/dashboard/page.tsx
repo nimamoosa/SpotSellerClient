@@ -1,6 +1,16 @@
 "use client";
 
 import { Statistics } from "@/components/statistics";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card } from "@/components/ui/card";
 import { useBot } from "@/contexts/botContext";
 import { useBotVisit } from "@/contexts/botVisitContext";
@@ -22,6 +32,7 @@ export default function Dashboard() {
       transaction_count: number;
     }[]
   >([]);
+  const [open, setOpen] = useState(false);
 
   const { bot, isLoadingBots } = useBot();
   const { botVisits, isLoadingBotVisits } = useBotVisit();
@@ -173,6 +184,22 @@ export default function Dashboard() {
 
   return (
     <Fragment>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <p dir="rtl">شماره پشتیبانی</p>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <p>+989131695571</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>بستن</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <header className="flex justify-between w-full">
         {cards.map((item, index) => {
           return (
@@ -260,7 +287,10 @@ export default function Dashboard() {
             </div>
 
             <div className="p-2">
-              <button className="flex mt-2 items-center text-[#5B0CCA] transition-all ease-in-out duration-75 hover:text-[#2761D9]">
+              <button
+                className="flex mt-2 items-center text-[#5B0CCA] transition-all ease-in-out duration-75 hover:text-[#2761D9]"
+                onClick={() => setOpen(true)}
+              >
                 تماس با پشتیبانی اسپات سلر <ArrowLeft />
               </button>
             </div>

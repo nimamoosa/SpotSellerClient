@@ -33,11 +33,9 @@ export default function Dashboard() {
     {
       header: isLoadingTransactions
         ? "connect...."
-        : transactions.filter(
-            (item) =>
-              item.date.split("/")[1] === time.jm.toString() &&
-              item.users.some((user) => user.type === "success")
-          ).length,
+        : transactions.find(
+            (item) => item.date.split("/")[1] === time.jm.toString()
+          )?.users.length || 0,
       description: "تراکنش در این ماه",
       backColor: "bg-[#6611DD]",
       iconBackColor: "bg-[#510EB1]",
@@ -86,6 +84,8 @@ export default function Dashboard() {
         : (() => {
             const todaysVisits = botVisits
               ?.filter((item) => {
+                console.log(item.date.split("/")[2], time.jd);
+
                 return item.date.split("/")[2] === String(time.jd);
               })
               .reduce((acc, item) => {
@@ -118,29 +118,39 @@ export default function Dashboard() {
   useEffect(() => {
     if (!botVisits?.length && !transactions?.length) return;
 
-    const lastTenBotVisits = botVisits.slice(-30);
+    // گرفتن آخرین 30 ورودی از botVisits یا ایجاد لیست خالی
+    const lastTenBotVisits = botVisits?.slice(-30) || [];
 
-    const filterBotVisit = lastTenBotVisits
-      .map((botVisit) => {
-        if (!botVisit?.date) return null;
+    // استخراج تمام تاریخ‌ها از transactions و botVisits
+    const allDates = new Set(
+      [
+        ...transactions.map((transaction) => transaction.date),
+        ...lastTenBotVisits.map((botVisit) => botVisit.date),
+      ].filter(Boolean) // حذف مقادیر null یا undefined
+    );
+
+    // بررسی و تطابق داده‌های transactions و botVisits
+    const filterBotVisit = Array.from(allDates)
+      .map((date) => {
+        const matchingBotVisit = lastTenBotVisits.find(
+          (botVisit) => botVisit?.date === date
+        );
 
         const matchingTransaction = transactions.find(
-          (transaction, index) =>
-            transaction?.date?.split("/")[1] === botVisit.date.split("/")[1] &&
-            transaction.users[index].type === "success"
+          (transaction) =>
+            transaction?.date === date &&
+            transaction.users.some((user) => user.type === "success")
         );
 
         return {
-          telegram_views_count: botVisit.users?.length || 0,
-          transaction_count: matchingTransaction
-            ? matchingTransaction.users?.length || 0
-            : 0,
-          date: botVisit.date,
+          telegram_views_count: matchingBotVisit?.users?.length || 0,
+          transaction_count: matchingTransaction?.users?.length || 0,
+          date,
         };
       })
-      .filter((item): item is NonNullable<typeof item> => item !== null); // حذف مقادیر null
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // مرتب‌سازی بر اساس تاریخ
 
-    // Add missing dates if necessary
+    // افزودن تاریخ‌های گم‌شده تا رسیدن به 30 تاریخ
     while (filterBotVisit.length < 30) {
       const lastDate = filterBotVisit[0]?.date;
 
@@ -157,8 +167,8 @@ export default function Dashboard() {
       });
     }
 
-    // Set the chart data
-    setChartData(filterBotVisit); // اکنون آرایه فقط شامل اشیاء معتبر است
+    // تنظیم داده‌های نمودار
+    setChartData(filterBotVisit);
   }, [botVisits, transactions]);
 
   return (

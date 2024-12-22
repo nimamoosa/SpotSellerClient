@@ -4,6 +4,7 @@ export type BotVisitUsersType = {
 };
 
 export type TransactionUsersType = {
+  _id: string;
   userId: number;
   name: string;
   amount: string;

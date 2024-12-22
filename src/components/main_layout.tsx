@@ -19,7 +19,7 @@ export default function MainLayout({
   const { user, setUser } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert } = useController();
+  const { setAlert, linkController } = useController();
 
   useEffect(() => {
     receiverEvent("logoutEventReceiver", (data) => {
@@ -218,13 +218,26 @@ export default function MainLayout({
           </section>
         </header>
 
-        <main className="w-full h-[90%] max-h-[89%] rounded-tr-[37px] bg-white p-3">
-          <section slot="top" className="mr-1 h-[10vh]">
+        <main className="w-full h-[90%] max-h-[90%] rounded-tr-[37px] bg-white p-3">
+          <section slot="top" className="h-[10vh]">
             <div className="flex items-center w-[97%] h-[8vh] ml-auto mr-auto text-xl font-semibold mb-5">
               پنل ناشر <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
               <span>
-                {buttons.find((button) => button.href === pathname)?.text || ""}
+                {buttons
+                  .sort((a, b) => b.href.length - a.href.length)
+                  .find((button) => pathname.startsWith(button.href))?.text ||
+                  ""}
               </span>
+              {linkController.map((item, index) => {
+                return (
+                  <span
+                    key={index}
+                    className="flex items-center justify-center"
+                  >
+                    <BsArrowLeft className="ml-2 mr-2" size={20} /> {item.link}
+                  </span>
+                );
+              })}
             </div>
           </section>
 

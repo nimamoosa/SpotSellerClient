@@ -47,7 +47,7 @@ export default function BotVisitProvider({
     receiverEvent("getBotVisitEventReceiver", (data) => {
       if (!data.success) return setIsLoadingBotVisits(false);
 
-      setBotVisits(data?.visit?.users_visit);
+      setBotVisits(data?.visit?.users_visit || []);
       setIsLoadingBotVisits(false);
     });
   }, []);

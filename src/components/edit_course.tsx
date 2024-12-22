@@ -22,6 +22,7 @@ import { randomBytes } from "crypto";
 import { BsShop } from "react-icons/bs";
 import AmountInput from "./amount_input";
 import { useFile } from "@/contexts/fileContext";
+import { useController } from "@/contexts/controllerContext";
 
 export default function EditCourse({
   course,
@@ -57,6 +58,7 @@ export default function EditCourse({
   const { setCourses, courses } = useCourse();
   const { user } = useAuth();
   const { fileUrls, setFileUrls } = useFile();
+  const { setAlert } = useController();
 
   useEffect(() => {
     receiverEvent("editCourseEventReceiver", (data) => {
@@ -85,8 +87,6 @@ export default function EditCourse({
     if (!fileUrls?.length) return;
     if (!course) return;
 
-    console.log(course, fileUrls);
-
     setPreview(
       fileUrls.find((file) => file.controllerId === course._id)?.file || ""
     );
@@ -102,6 +102,8 @@ export default function EditCourse({
       }
 
       if (!data.downloadLink) return;
+
+      setProgress(0);
 
       setDownloadLink(data.downloadLink);
     });
@@ -164,6 +166,18 @@ export default function EditCourse({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024)
+      return setAlert({
+        text: "شما بیشتر از 20 مگ نمیتوانید عکسی آپلود کنید",
+        type: "warning",
+      });
+
+    if (!["image/png", "image/jpg", "image/jpeg"].includes(file?.type))
+      return setAlert({ text: "نوع فایل صحیح نمی باشد", type: "error" });
+
     if (file) {
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));

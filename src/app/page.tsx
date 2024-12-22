@@ -124,10 +124,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    console.log(alert);
-  }, [alert]);
-
-  useEffect(() => {
     if (!botTrue.is) return;
 
     sendEvent("login", {

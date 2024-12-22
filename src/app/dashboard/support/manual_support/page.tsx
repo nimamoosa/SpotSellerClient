@@ -10,7 +10,7 @@ import { useController } from "@/contexts/controllerContext";
 import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function ManualSupport() {
   const [telegramId, setTelegramId] = useState("");
@@ -21,9 +21,18 @@ export default function ManualSupport() {
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
-  const { support, isLoadingSupport } = useBotSupport();
-  const { setAlert } = useController();
-  const { isLoading } = useLoading();
+  const { isLoadingSupport, support, setSupport } = useBotSupport();
+  const { setAlert, addLink, removeLink } = useController();
+  const { isLoading, startLoading, stopLoading } = useLoading();
+  const isSetLink = useRef(false);
+
+  useEffect(() => {
+    if (isSetLink.current) return;
+
+    isSetLink.current = true;
+
+    addLink("پشتیبانی دستی", "support");
+  }, [isSetLink]);
 
   useEffect(() => {
     receiverEvent("userAvailableEventReceiver", (data) => {
@@ -45,26 +54,48 @@ export default function ManualSupport() {
     if (!open) setUserInfo({});
   }, [open]);
 
-  const handleClickSet = useCallback(() => {
+  useEffect(() => {
+    receiverEvent("supportEventReceiver", (data) => {
+      if (!data.success) return setAlert({ text: data.message, type: "error" });
+
+      stopLoading();
+      setSupport(data.data);
+      setAlert({ text: "آیدی با موفقیت اعمال شد" });
+    });
+  }, []);
+
+  const handleSendEvent = useCallback(() => {
     if (!user) return;
     if (!telegramId) return;
+    if (isLoadingSupport) return;
 
-    sendEvent("userAvailable", { userId: user.userId, telegramId });
-  }, [user, telegramId]);
+    startLoading();
+
+    if (!support)
+      return sendEvent("createSupport", {
+        userId: user.userId,
+        botId: user.botId,
+        provider: "manual",
+        supportId: telegramId,
+      });
+
+    return sendEvent("updateSupport", {
+      userId: user.userId,
+      botId: user.botId,
+      provider: "manual",
+      supportId: telegramId,
+    });
+  }, [user, support, isLoadingSupport, telegramId]);
 
   return (
     <div className="flex gap-3 flex-col items-center justify-center">
-      <ViewUserProfile
-        open={open}
-        setOpen={setOpen}
-        profile={userInfo}
-        telegramId={telegramId}
-      />
-
       <div className="flex items-center justify-end w-[91%]">
         <Button
           className="border-[#D6D6D6] w-[10%] h-[6.5vh] border-2"
-          onClick={() => router.back()}
+          onClick={() => {
+            router.back();
+            removeLink("support");
+          }}
           disabled={isLoadingSupport || isLoading}
         >
           بازگشت
@@ -86,7 +117,7 @@ export default function ManualSupport() {
           <LoadingButton
             className="border-[#D6D6D6] h-[6.5vh] border-2"
             variant={"ghost"}
-            onClick={handleClickSet}
+            onClick={handleSendEvent}
             disabled={!telegramId || isLoadingSupport || isLoading}
           >
             اعمال آیدی

@@ -1,21 +1,99 @@
 import { TransactionUsersType } from "@/types/visit";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "./ui/drawer";
 import { Button } from "./ui/button";
-import { Minus, Plus } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import { useCourse } from "@/contexts/courseContext";
 
 export default function ViewCustomerPurchaseHistory({
   purchase,
+  setUserPurchase,
 }: {
   purchase: TransactionUsersType[];
+  setUserPurchase: Dispatch<SetStateAction<TransactionUsersType[]>>;
 }) {
-  return <div>hi</div>;
+  const { courses } = useCourse();
+
+  const successButton = () => {
+    return (
+      <span className="bg-[#66BB00]/10 w-[126px] h-[35px] rounded-full text-[16px] flex items-center justify-center text-[#519506]">
+        پرداخت شده
+      </span>
+    );
+  };
+
+  const inProgressButton = () => {
+    return (
+      <span className="bg-[#BB9C00]/10 w-[144px] h-[35px] rounded-full text-[16px] flex items-center justify-center text-[#956306]">
+        در انتظار پرداخت
+      </span>
+    );
+  };
+
+  const cancelButton = () => {
+    return (
+      <span className="bg-[#BB0000]/10 w-[96px] h-[35px] rounded-full text-[16px] flex items-center justify-center text-[#950606]">
+        لفو شده
+      </span>
+    );
+  };
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mt-2">
+        <div>
+          <p className="text-[23px]">آخرین گزارشات {purchase[0].name}</p>
+        </div>
+
+        <div>
+          <Button onClick={() => setUserPurchase([])}>بازگشت</Button>
+        </div>
+      </div>
+
+      <div className="overflow-auto">
+        <div className="border border-[#D6D6D6] rounded-lg overflow-hidden mt-5">
+          <Table className="w-full border-collapse" dir="ltr">
+            <TableHeader>
+              <TableRow className="bg-[#F6F6F6] border-b border-gray-300 *:p-5">
+                <TableHead className="text-center border-l border-gray-300 w-[30%]">
+                  عملیات
+                </TableHead>
+                <TableHead className="text-end border-l border-gray-300 w-[70%]">
+                  عنوان دوره
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {purchase.map((item, index) => (
+                <TableRow
+                  key={index}
+                  className="hover:bg-gray-100 border-b border-gray-300"
+                >
+                  <TableCell className="text-center flex items-center justify-evenly p-4 border-l border-gray-300">
+                    {item.type === "success"
+                      ? successButton()
+                      : item.type === "cancel"
+                      ? cancelButton()
+                      : inProgressButton()}
+                  </TableCell>
+
+                  <TableCell className="text-end border-l border-gray-300">
+                    <p className="mr-3">
+                      {courses.find((course) => course._id === item._id)?.title}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </section>
+  );
 }

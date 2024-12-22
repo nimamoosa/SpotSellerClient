@@ -5,9 +5,10 @@ import EditCourse from "@/components/edit_course";
 import SalesReports from "@/components/sales_reports";
 import ShowCourse from "@/components/show_course";
 import { Spinner } from "@/components/ui/spinner";
+import { useController } from "@/contexts/controllerContext";
 import { useCourse } from "@/contexts/courseContext";
 import { CourseType } from "@/types/course";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function ManagementOfCourses() {
   const [type, setType] = useState<
@@ -16,6 +17,26 @@ export default function ManagementOfCourses() {
   const [course, setCourse] = useState<CourseType>();
 
   const { courses, isLoadingCourse } = useCourse();
+  const { addLink, removeLink } = useController();
+
+  useEffect(() => {
+    switch (type) {
+      case "add_course":
+        addLink("افزودن دوره", "course");
+        break;
+
+      case "edit_course":
+        addLink("ویرایش دوره", "course");
+        break;
+
+      case "sales_reports":
+        addLink("گزارشات فروش", "course");
+        break;
+
+      default:
+        removeLink("course");
+    }
+  }, [type]);
 
   const render = useCallback(() => {
     if (isLoadingCourse)
@@ -68,5 +89,5 @@ export default function ManagementOfCourses() {
     }
   }, [courses, isLoadingCourse, type]);
 
-  return <main className="w-full h-full overflow-auto">{render()}</main>;
+  return <div className="h-full">{render()}</div>;
 }

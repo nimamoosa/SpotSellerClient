@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import ViewCustomerPurchaseHistory from "@/components/view_customer_purchase_history";
 import { useAuth } from "@/contexts/authContext";
+import { useController } from "@/contexts/controllerContext";
 import { useRegisteredUsers } from "@/contexts/registeredUsersContext";
 import { useTransaction } from "@/contexts/transactionContext";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
@@ -27,6 +28,16 @@ export default function ManagementUsers() {
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
   const { transactions } = useTransaction();
+  const { addLink, removeLink, setAlert } = useController();
+
+  useEffect(() => {
+    if (userClick) return addLink("ویرایش کاربر", "management_of_user");
+
+    if (userPurchase.length !== 0)
+      return addLink("گزارشات", "management_of_user");
+
+    removeLink("management_of_user");
+  }, [userClick, userPurchase]);
 
   useEffect(() => {
     receiverEvent("updateBanStatusEventReceiver", (data) => {
@@ -35,6 +46,10 @@ export default function ManagementUsers() {
       setRegisteredUsers(data.data.authentications);
     });
   }, []);
+
+  useEffect(() => {
+    console.log(userPurchase);
+  }, [userPurchase]);
 
   const handleBanedUser = useCallback(
     (userId: number, status: boolean) => {
@@ -49,25 +64,32 @@ export default function ManagementUsers() {
     [user]
   );
 
-  const handleOnClick = useCallback(() => {
-    if (!user) return;
-
-    const tran = transactions.map((item) =>
+  const handleOnClick = (user: RegisteredUsersType) => {
+    const tran = transactions.filter((item) =>
       item.users.find((item) => item.userId == user.userId)
     );
 
-    if (!tran?.length) return alert("این کاربر تراکنشی ندارد");
+    const fix = tran.flat().flatMap((i) => i.users);
 
-    setUserPurchase(
-      tran.filter((item) => item !== undefined) as TransactionUsersType[]
-    );
-  }, [user]);
+    if (fix.length < 0)
+      return setAlert({ text: "این کاربر تراکنشی ندارد", type: "warning" });
+
+    setUserPurchase(fix);
+  };
 
   const renderPage = useCallback(() => {
     if (userClick)
       return <EditUserInfo userClick={userClick} setUserClick={setUserClick} />;
 
-    if (registeredUsers?.length >= 0) {
+    if (userPurchase?.length !== 0)
+      return (
+        <ViewCustomerPurchaseHistory
+          purchase={userPurchase}
+          setUserPurchase={setUserPurchase}
+        />
+      );
+
+    if (registeredUsers?.length >= 0 && userPurchase?.length === 0) {
       return (
         <div className="border border-[#D6D6D6] rounded-lg overflow-hidden">
           <Table className="w-full border-collapse" dir="ltr">
@@ -119,7 +141,7 @@ export default function ManagementUsers() {
                     <Button
                       variant={"ghost"}
                       className="text-blue-500 hover:underline"
-                      onClick={handleOnClick}
+                      onClick={() => handleOnClick(item)}
                     >
                       مشاهده سابقه خرید مشتری
                     </Button>
@@ -141,15 +163,12 @@ export default function ManagementUsers() {
       );
     }
 
-    if (userPurchase.length > 0)
-      return <ViewCustomerPurchaseHistory purchase={userPurchase} />;
-
     return (
       <div className="h-full w-full flex items-center justify-center text-3xl">
         <p className="">کاربری یافت نشد!</p>
       </div>
     );
-  }, [userClick, registeredUsers, setUserClick]);
+  }, [userClick, registeredUsers, userPurchase]);
 
   return <main className="h-full overflow-auto">{renderPage()}</main>;
 }

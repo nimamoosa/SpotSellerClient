@@ -25,7 +25,8 @@ type PaymentResponse = {
 
 export default function usePayment(
   paymentId: string | null,
-  verifyToken: string | null
+  verifyToken: string | null,
+  country: string | undefined
 ) {
   const [loadingRequest, setLoadingRequest] = useState<boolean>(true);
   const [loadingCreatedLink, setLoadingCreatedLink] = useState<boolean>(true);
@@ -41,14 +42,16 @@ export default function usePayment(
   const { setAlert } = useController();
 
   useEffect(() => {
-    if (!paymentId || !verifyToken) {
+    if (!country) return;
+
+    if (!paymentId || !verifyToken || country !== "IR") {
       setLoadingRequest(false);
       setIsError(true);
       return;
     }
 
     setValidField(true);
-  }, [paymentId, verifyToken]);
+  }, [paymentId, verifyToken, country]);
 
   useEffect(() => {
     if (!validField) return;
@@ -76,8 +79,6 @@ export default function usePayment(
   useEffect(() => {
     if (loadingRequest || isError) return;
     if (payment == null) return;
-
-    console.log("created....");
 
     sendEvent("createPaymentLink", { paymentId, verify_token: verifyToken });
   }, [loadingRequest, isError, paymentId, verifyToken, payment]);

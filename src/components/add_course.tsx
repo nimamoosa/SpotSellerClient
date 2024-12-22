@@ -112,7 +112,16 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
-    console.log(file?.type);
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024)
+      return setAlert({
+        text: "شما بیشتر از 20 مگ نمیتوانید عکسی آپلود کنید",
+        type: "warning",
+      });
+
+    if (!["image/png", "image/jpg", "image/jpeg"].includes(file?.type))
+      return setAlert({ text: "نوع فایل صحیح نمی باشد", type: "error" });
 
     if (file) {
       setSelectedFile(file);
@@ -128,12 +137,12 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
   ) => {
     if (!file) return;
 
-    const chunkSize = 1024 * 1024; // 1 MB per chunk (adjust as necessary)
+    // Reduce chunk size to 256KB for more frequent updates
+    const chunkSize = 128 * 1024; // 256KB per chunk
     const totalChunks = Math.ceil(file.size / chunkSize);
 
     let chunkIndex = 0;
 
-    // Read and send file chunks sequentially
     const sendChunk = () => {
       const reader = new FileReader();
       const start = chunkIndex * chunkSize;
@@ -141,7 +150,6 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
 
       const chunk = file.slice(start, end);
 
-      // Return a promise that resolves once the chunk is sent
       return new Promise<void>((resolve, reject) => {
         reader.onloadend = () => {
           const data = {
@@ -155,35 +163,35 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
             name,
           };
 
-          // Send the chunk to the server via Socket.IO
           sendEvent("uploadFile", data);
 
-          // If there are more chunks, resolve to send the next one
           if (chunkIndex + 1 < totalChunks) {
             chunkIndex++;
-            resolve(); // Continue to the next chunk
+            resolve();
           } else {
-            // setUploadMessage("File upload complete!");
-            resolve(); // End the process when the last chunk is sent
+            resolve();
           }
         };
 
-        reader.onerror = (error) => reject(error); // Handle reading errors
-
-        // Read the current chunk as a data URL (Base64)
+        reader.onerror = (error) => {
+          console.error("Upload error:", error);
+          reject(error);
+        };
         reader.readAsDataURL(chunk);
       });
     };
 
-    // Function to start uploading chunks sequentially
     const uploadChunksSequentially = async () => {
-      for (let i = chunkIndex; i < totalChunks; i++) {
-        await sendChunk(); // Wait for each chunk to finish before sending the next
+      try {
+        for (let i = chunkIndex; i < totalChunks; i++) {
+          await sendChunk();
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
       }
     };
 
-    // setUploading(true);
-    uploadChunksSequentially(); // Start sending the file chunks sequentially
+    uploadChunksSequentially();
   };
 
   return (
@@ -346,11 +354,11 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
       </section>
 
       <section className="mt-2">
-        <div className="flex justify-between mb-2">
-          <div>
+        <div className="flex mb-2">
+          <div className="w-[50%] flex items-center justify-start">
             <Input
               placeholder="عنوان دوره"
-              className="w-[545px] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
+              className="w-[99%] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
               name="title"
               onChange={handleChange}
               value={values.title}
@@ -358,10 +366,10 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
             />
           </div>
 
-          <div>
+          <div className="w-[50%] flex items-center justify-end">
             <Input
               placeholder="شناسه دوره را وارد کنید"
-              className="w-[545px] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
+              className="w-[99%] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
               name="course_id"
               onChange={handleChange}
               value={values.course_id}

@@ -11,7 +11,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 type IPInfo = {
-  city?: string;
+  country?: string;
 };
 
 export default function PaymentPage() {
@@ -24,7 +24,7 @@ export default function PaymentPage() {
   const paymentId = searchParams.get("paymentId");
 
   const { isError, loadingRequest, payment, loadingCreatedLink, paymentLink } =
-    usePayment(paymentId, token);
+    usePayment(paymentId, token, ipInfo?.country);
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { setAlert } = useController();
 
@@ -69,13 +69,13 @@ export default function PaymentPage() {
     );
   }
 
-  // if (ipInfo?.city !== "IR") {
-  //   return (
-  //     <div className="flex items-center justify-center">
-  //       <p>لطفا وی پی ان خود را خاموش کرده و مجدد تلاش کنید</p>
-  //     </div>
-  //   );
-  // }
+  if (ipInfo?.country !== "IR") {
+    return (
+      <div className="flex items-center justify-center">
+        <p>لطفا وی پی ان خود را خاموش کرده و مجدد تلاش کنید</p>
+      </div>
+    );
+  }
 
   if (isError) {
     return (

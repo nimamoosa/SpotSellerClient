@@ -28,7 +28,7 @@ export default function ShowCourse({
   const { courses } = useCourse();
 
   return (
-    <div>
+    <main className="w-full h-full overflow-auto">
       <header className="flex justify-between items-center">
         <div className="w-[50%]">
           <div>
@@ -105,6 +105,6 @@ export default function ShowCourse({
           </TableBody>
         </Table>
       </main>
-    </div>
+    </main>
   );
 }

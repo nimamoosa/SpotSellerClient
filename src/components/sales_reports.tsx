@@ -29,11 +29,10 @@ export default function SalesReports({
   const conversion = useCallback(() => {
     if (!course) return;
 
-    const total = course.sales_reports.sale + course.sales_reports.canceled;
-    const finished = total / course.sales_reports.canceled;
-    const percent = finished / 100;
+    const finished = course.sales_reports.sale / course.sales_reports.canceled;
+    const percent = finished * 100;
 
-    return percent || 0;
+    return Math.ceil(percent) || 0;
   }, [course]);
 
   return (

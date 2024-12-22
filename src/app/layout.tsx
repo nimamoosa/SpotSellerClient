@@ -22,6 +22,41 @@ export const metadata: Metadata = {
   title: "Spot Seller - اسپات سلر",
   description: "سرویس مدیریت اسپات پلیر",
   icons: "/icon.svg",
+  authors: [{ name: "nima", url: "https://github.com/nimamoosa/" }],
+  creator: "pixel",
+  keywords: [
+    "spot",
+    "seller",
+    "اسپات",
+    "سلر",
+    "اسپات سلر",
+    "spot seller",
+    "اسپات سلر",
+    "spot",
+    "seller",
+    "اسپات",
+    "سلر",
+    "اسپات سلر",
+    "spot seller",
+    "اسپات سلر",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fa_IR",
+    url: "https://spotseller.ir",
+    siteName: "Spot Seller",
+    title: "Spot Seller - اسپات سلر",
+    description: "سرویس مدیریت اسپات پلیر",
+    images: [
+      {
+        url: "/Frame 1.jpg",
+        width: 1080,
+        height: 1080,
+        alt: "SpotSeller",
+      },
+    ],
+    phoneNumbers: ["+989131695571"],
+  },
 };
 
 export default function RootLayout({

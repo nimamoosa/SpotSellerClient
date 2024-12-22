@@ -39,7 +39,7 @@ export default function usePayment(
   const [validField, setValidField] = useState(false);
 
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
 
   useEffect(() => {
     if (!country) return;
@@ -65,12 +65,12 @@ export default function usePayment(
       setLoadingRequest(false);
       if (!data.success) {
         setIsError(true);
-        setAlert({ text: data.message || "", type: "error" });
+        addAlert(data.message || "", "error");
         return;
       }
       setPayment(data.data || null);
     });
-  }, [receiverEvent, setAlert]);
+  }, [receiverEvent, addAlert]);
 
   useEffect(() => {
     console.log(payment);
@@ -88,7 +88,7 @@ export default function usePayment(
       setLoadingCreatedLink(false);
       if (!data.success) {
         setIsError(true);
-        setAlert({ text: data.message || "", type: "error" });
+        addAlert(data.message || "", "error");
         return;
       }
 
@@ -96,7 +96,7 @@ export default function usePayment(
     };
 
     receiverEvent("createPaymentLinkEventReceiver", handlePaymentLinkResponse);
-  }, [receiverEvent, setAlert]);
+  }, [receiverEvent, addAlert]);
 
   return {
     payment,

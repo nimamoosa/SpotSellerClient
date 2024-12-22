@@ -51,7 +51,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { setCourses, courses } = useCourse();
   const { user } = useAuth();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
 
   useEffect(() => {
     receiverEvent("uploadFileEventReceiver", (data) => {
@@ -115,13 +115,13 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     if (!file) return;
 
     if (file.size > 20 * 1024 * 1024)
-      return setAlert({
-        text: "شما بیشتر از 20 مگ نمیتوانید عکسی آپلود کنید",
-        type: "warning",
-      });
+      return addAlert(
+        "شما بیشتر از 20 مگ نمیتوانید عکسی آپلود کنید",
+        "warning"
+      );
 
     if (!["image/png", "image/jpg", "image/jpeg"].includes(file?.type))
-      return setAlert({ text: "نوع فایل صحیح نمی باشد", type: "error" });
+      return addAlert("نوع فایل صحیح نمی باشد", "error");
 
     if (file) {
       setSelectedFile(file);
@@ -200,10 +200,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
         e.preventDefault();
 
         if (selectedFile === null)
-          return setAlert({
-            text: "شما باید حداقل یک عکس اضافه کنید",
-            type: "warning",
-          });
+          return addAlert("شما باید حداقل یک عکس اضافه کنید", "warning");
 
         startLoading();
 

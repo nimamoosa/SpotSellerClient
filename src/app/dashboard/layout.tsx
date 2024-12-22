@@ -11,7 +11,7 @@ function InnerComponent() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
   const router = useRouter();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
   const { stopLoading } = useLoading();
   const { user, loadingAuth } = useAuth();
 
@@ -21,19 +21,15 @@ function InnerComponent() {
     stopLoading();
 
     if (code === "200") {
-      setAlert({
-        text: "به SpotSeller خوش آمدید",
-      });
+      addAlert("به SpotSeller خوش آمدید");
 
       router.replace("/dashboard");
     } else if (code === "201") {
-      setAlert({
-        text: "اکانت شما با موفقیت ساخته شد",
-      });
+      addAlert("اکانت شما با موفقیت ساخته شد");
 
       router.replace("/dashboard");
     }
-  }, [code, setAlert, router]);
+  }, [code, addAlert, router]);
 
   useEffect(() => {
     if (!loadingAuth && !user) router.push("/");

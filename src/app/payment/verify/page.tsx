@@ -26,13 +26,13 @@ export default function VerifyPayment() {
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { clientId } = useSocket();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
   const hasSentUpdate = useRef(false);
   const hasSendCreateLicense = useRef(false);
 
   useEffect(() => {
     if (!status || !authority || !paymentId || !token) {
-      setAlert({ text: "Error" });
+      addAlert("Error", "error");
       return;
     }
 
@@ -52,13 +52,13 @@ export default function VerifyPayment() {
 
       if (!data.success) {
         setIsError(true);
-        setAlert({ text: "این درخواست معتبر نیست", type: "error" });
+        addAlert("این درخواست معتبر نیست", "error");
       } else {
         setCourseId(data.courseId);
         setIsValidRequest(true);
       }
     });
-  }, [receiverEvent, clientId, setAlert]);
+  }, [receiverEvent, clientId, addAlert]);
 
   useEffect(() => {
     if (loading || !token || !paymentId || !status) return;
@@ -102,10 +102,7 @@ export default function VerifyPayment() {
   useEffect(() => {
     receiverEvent("createLicenseKeyEvent", (data) => {
       if (!data.success) {
-        return setAlert({
-          text: "مشکلی در ساخت لایسنس به وجود آمد",
-          type: "error",
-        });
+        return addAlert("مشکلی در ساخت لایسنس به وجود آمد", "error");
       }
 
       setLicense(data.license);

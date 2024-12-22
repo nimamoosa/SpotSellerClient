@@ -35,7 +35,7 @@ export default function SmsSystem() {
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
   const { user } = useAuth();
   const { smsService, setSmsService } = useSmsService();
 
@@ -49,7 +49,7 @@ export default function SmsSystem() {
     receiverEvent("checkAPIkeyEventReceiver", (data) => {
       if (data.data === false) {
         stopLoading();
-        setAlert({ text: "توکن اشتباه است", type: "error" });
+        addAlert("توکن اشتباه است", "error");
       }
 
       setIsValidToken(false);

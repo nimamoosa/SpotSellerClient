@@ -19,14 +19,13 @@ export default function FinanceSettings() {
 
   const { isLoadingPayment, setPayment, payment } = usePayment();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
   const { user } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   useEffect(() => {
     receiverEvent("createClientPaymentEventReceiver", (data) => {
-      data?.success_message &&
-        setAlert({ text: data.success_message, type: "success" });
+      data?.success_message && addAlert(data.success_message, "success");
 
       setPayment(data.data);
       stopLoading();
@@ -53,10 +52,7 @@ export default function FinanceSettings() {
       !values ||
       (values.cart_by_cart === undefined && values.zarinpal === undefined)
     ) {
-      return setAlert({
-        text: "شما باید حداقل یک فیلد را پر کنید",
-        type: "error",
-      });
+      return addAlert("شما باید حداقل یک فیلد را پر کنید", "error");
     }
 
     startLoading();

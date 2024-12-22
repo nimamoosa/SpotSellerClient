@@ -1,14 +1,11 @@
 // PaymentPage Component
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { useController } from "@/contexts/controllerContext";
 import usePayment from "@/hooks/usePayment";
-import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { ArrowUpRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type IPInfo = {
   country?: string;
@@ -25,8 +22,6 @@ export default function PaymentPage() {
 
   const { isError, loadingRequest, payment, loadingCreatedLink, paymentLink } =
     usePayment(paymentId, token, ipInfo?.country);
-  const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert } = useController();
 
   useEffect(() => {
     if (!token || !paymentId) return;

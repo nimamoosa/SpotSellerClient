@@ -22,7 +22,7 @@ export default function ManualSupport() {
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
   const { isLoadingSupport, support, setSupport } = useBotSupport();
-  const { setAlert, addLink, removeLink } = useController();
+  const { addAlert, addLink, removeLink } = useController();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const isSetLink = useRef(false);
 
@@ -36,8 +36,7 @@ export default function ManualSupport() {
 
   useEffect(() => {
     receiverEvent("userAvailableEventReceiver", (data) => {
-      if (data.success === false)
-        return setAlert({ text: data.message, type: "error" });
+      if (data.success === false) return addAlert(data.message, "error");
 
       setUserInfo(data.data);
       setOpen(true);
@@ -56,11 +55,11 @@ export default function ManualSupport() {
 
   useEffect(() => {
     receiverEvent("supportEventReceiver", (data) => {
-      if (!data.success) return setAlert({ text: data.message, type: "error" });
+      if (!data.success) return addAlert(data.message, "error");
 
       stopLoading();
       setSupport(data.data);
-      setAlert({ text: "آیدی با موفقیت اعمال شد" });
+      addAlert("آیدی با موفقیت اعمال شد");
     });
   }, []);
 

@@ -20,15 +20,13 @@ export default function LicensePage() {
   const { licenses, loadingLicenses } = useLicense();
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
 
   useEffect(() => {
     receiverEvent("sendMessageEventReceiver", () => {
-      setAlert({ text: "لایسنس با موفقیت ارسال شد", type: "success" });
+      addAlert("لایسنس با موفقیت ارسال شد", "success");
     });
   }, []);
-
-  window;
 
   const sendTelegramUserLicense = (userId: number, text: string) => {
     sendEvent("telegramSendMessage", {
@@ -77,12 +75,11 @@ export default function LicensePage() {
                       className="bg-[#BE6D05]/10 -mr-5 text-[#BE6D05] hover:bg-[#BE6D05]/20 rounded-full"
                       type="button"
                       onClick={() =>
-                        navigator.clipboard.writeText(item.course_id).then(() =>
-                          setAlert({
-                            text: "شناسه با موفقیت کپی شد",
-                            type: "info",
-                          })
-                        )
+                        navigator.clipboard
+                          .writeText(item.course_id)
+                          .then(() =>
+                            addAlert("شناسه با موفقیت کپی شد", "info")
+                          )
                       }
                     >
                       کپی شناسه لایسنس

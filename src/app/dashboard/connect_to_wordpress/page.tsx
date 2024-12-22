@@ -18,7 +18,7 @@ export default function ConnectToWordpress() {
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { user, setUser } = useAuth();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
 
   useEffect(() => {
     if (!user) return;
@@ -32,11 +32,11 @@ export default function ConnectToWordpress() {
       stopLoading();
 
       if (data.success === false) {
-        setAlert({ text: "مشکلی در پردازش رخ داده است", type: "error" });
+        addAlert("مشکلی در پردازش رخ داده است", "error");
         return;
       }
 
-      setAlert({ text: "عملیات با موفقیت ذخیره شد" });
+      addAlert("عملیات با موفقیت ذخیره شد");
       setUser(data.data);
     });
 
@@ -46,14 +46,11 @@ export default function ConnectToWordpress() {
         const message = JSON.parse(data.message);
 
         if (message.code === "unauthorized") {
-          setAlert({ text: "authorization key اشتباه است", type: "error" });
+          addAlert("authorization key اشتباه است", "error");
         } else if (message.code === "rest_no_route") {
-          setAlert({
-            text: "افزونه SpotSellerAPI روی سایت شما فعال نیست",
-            type: "error",
-          });
+          addAlert("افزونه SpotSellerAPI روی سایت شما فعال نیست", "error");
         } else {
-          setAlert({ text: "لینک سایت اشتباه است" });
+          addAlert("لینک سایت اشتباه است");
         }
       } else {
         setIsSuccess(true);

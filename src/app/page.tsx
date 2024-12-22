@@ -20,7 +20,7 @@ export default function Home() {
   const pathname = usePathname();
 
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { auth, code, setAlert, name, alert } = useController();
+  const { auth, code, addAlert, name } = useController();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const { setBot } = useBot();
   const { user, setUser } = useAuth();
@@ -45,7 +45,7 @@ export default function Home() {
     receiverEvent("authenticationEvent", (data) => {
       setState("submit_code");
 
-      setAlert({ text: data.message });
+      addAlert(data.message);
       stopLoading();
       return;
     });
@@ -54,9 +54,7 @@ export default function Home() {
       const { auth } = data;
 
       if (!data.success) {
-        setAlert({
-          text: data.message,
-        });
+        addAlert(data.message);
         return;
       }
 
@@ -76,9 +74,7 @@ export default function Home() {
 
     receiverEvent("checkCodeEventReceiver", (data) => {
       if (!data.success) {
-        setAlert({
-          text: data.message,
-        });
+        addAlert(data.message);
         stopLoading();
         return;
       }
@@ -106,10 +102,7 @@ export default function Home() {
     receiverEvent("createBotEventReceiver", (data) => {
       if (data.success === false) {
         stopLoading();
-        setAlert({
-          text: data.message,
-          type: "error",
-        });
+        addAlert(data.message, "error");
         return;
       }
 

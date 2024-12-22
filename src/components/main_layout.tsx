@@ -19,14 +19,14 @@ export default function MainLayout({
   const { user, setUser } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert, linkController } = useController();
+  const { addAlert, linkController } = useController();
 
   useEffect(() => {
     receiverEvent("logoutEventReceiver", (data) => {
       stopLoading();
 
       if (!data.success) {
-        setAlert({ text: data.message, type: "error" });
+        addAlert(data.message, "error");
         return;
       }
 

@@ -31,7 +31,7 @@ export default function CompleteAuth({
   const { name, setName } = useController();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { setAlert, auth } = useController();
+  const { addAlert, auth } = useController();
 
   useEffect(() => {
     receiverEvent("testAPIkeyEventReceiver", (data) => {
@@ -39,10 +39,7 @@ export default function CompleteAuth({
 
       if (data.success === false) {
         setInstallPlugin(false);
-        setAlert({
-          text: data.data?.ex?.msg || "یه مشکلی به وجود آمده",
-          type: "error",
-        });
+        addAlert(data.data?.ex?.msg || "یه مشکلی به وجود آمده", "error");
       } else {
         setApisTrue(true);
       }

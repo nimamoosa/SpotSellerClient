@@ -28,7 +28,7 @@ export default function ManagementUsers() {
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
   const { transactions } = useTransaction();
-  const { addLink, removeLink, setAlert } = useController();
+  const { addLink, removeLink, addAlert } = useController();
 
   useEffect(() => {
     if (userClick) return addLink("ویرایش کاربر", "management_of_user");
@@ -71,8 +71,7 @@ export default function ManagementUsers() {
 
     const fix = tran.flat().flatMap((i) => i.users);
 
-    if (fix.length < 0)
-      return setAlert({ text: "این کاربر تراکنشی ندارد", type: "warning" });
+    if (fix.length < 0) return addAlert("این کاربر تراکنشی ندارد", "warning");
 
     setUserPurchase(fix);
   };

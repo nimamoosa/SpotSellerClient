@@ -1,32 +1,25 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useController } from "@/contexts/controllerContext";
 
 const Alert: React.FC = () => {
-  const [secondsLeft, setSecondsLeft] = useState(5);
-
-  const { alert, setAlert, onCloseAlert } = useController();
+  const { alerts, removeAlert } = useController();
 
   useEffect(() => {
-    if (!alert) return;
+    const timers: NodeJS.Timeout[] = [];
+    alerts.forEach((alert) => {
+      const timer = setTimeout(() => {
+        removeAlert(alert.id); // Automatically remove alert after timeout
+      }, alert.timeout);
+      timers.push(timer);
+    });
 
-    setSecondsLeft(5); // Reset countdown when alert is visible
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer); // Cleanup the timer
-          setTimeout(() => {
-            setAlert(null);
-            onCloseAlert && onCloseAlert();
-          }, 0); // Avoid state update during render
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [alert, setAlert]);
+    return () => {
+      timers.forEach(clearTimeout); // Cleanup timers on unmount
+    };
+  }, [alerts, removeAlert]);
 
   const typeStyles = {
     success:
@@ -39,9 +32,9 @@ const Alert: React.FC = () => {
   return (
     <div dir="ltr">
       <AnimatePresence>
-        {alert && (
+        {alerts.map((alert) => (
           <motion.div
-            key="alert"
+            key={alert.id}
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.9 }}
@@ -53,10 +46,7 @@ const Alert: React.FC = () => {
             <div className="flex items-center justify-between">
               <span className={`font-light`}>{alert.text}</span>
               <button
-                onClick={() => {
-                  setAlert(null);
-                  onCloseAlert && onCloseAlert();
-                }}
+                onClick={() => removeAlert(alert.id)}
                 className="ml-4 text-2xl rounded-xl text-white font-bold focus:outline-none active:text-black transition-colors"
               >
                 &times;
@@ -69,11 +59,11 @@ const Alert: React.FC = () => {
                 className="absolute top-0 left-0 h-full bg-teal-200 rounded-full"
                 initial={{ width: "100%" }}
                 animate={{ width: "0%" }}
-                transition={{ duration: 5, ease: "linear" }}
+                transition={{ duration: alert.timeout / 1000, ease: "linear" }}
               />
             </div>
           </motion.div>
-        )}
+        ))}
       </AnimatePresence>
     </div>
   );

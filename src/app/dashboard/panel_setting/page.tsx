@@ -27,7 +27,7 @@ export default function RobotSettings() {
   const { bot, setBot } = useBot();
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { setAlert } = useController();
+  const { addAlert } = useController();
   const { payment } = usePayment();
 
   const [botToken, setBotToken] = useState("");
@@ -59,21 +59,21 @@ export default function RobotSettings() {
 
   useEffect(() => {
     !payment &&
-      setAlert({
-        text: "شما اول باید یک روش برای پرداخت انتخاب کنید تا بات روشن شود",
-        type: "warning",
-      });
+      addAlert(
+        "شما اول باید یک روش برای پرداخت انتخاب کنید تا بات روشن شود",
+        "warning"
+      );
   }, [payment]);
 
   useEffect(() => {
     receiverEvent("updateBotTokenEventReceiver", (data) => {
       if (!data.success) {
         stopLoading();
-        setAlert({ text: data.message, type: "error" });
+        addAlert(data.message, "error");
         return;
       }
 
-      setAlert({ text: "توکن بات با موفقیت عوض شد", type: "success" });
+      addAlert("توکن بات با موفقیت عوض شد", "success");
 
       setBot(data.data);
       stopLoading();

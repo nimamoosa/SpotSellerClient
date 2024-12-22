@@ -164,6 +164,7 @@ export default function FinanceSettings() {
             className="h-[6.5vh] border-2 border-[#D6D6D6] rounded-lg w-[95%]"
             placeholder="شماره کارت خود را وارد کنید"
             value={values?.cart_by_cart || ""}
+            disabled
             onChange={(e) =>
               setValues({
                 zarinpal: values?.zarinpal,

@@ -17,9 +17,9 @@ import {
 const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   transports: ["websocket"],
   reconnection: true,
-  reconnectionAttempts: 10, // Retry 10 times
-  reconnectionDelay: 1000, // Wait 1 second before retrying
-  // port: 3000,
+  timeout: 86400000, // Increase to 60 seconds
+  reconnectionAttempts: 10,
+  forceNew: true,
 });
 
 const id = crypto.randomUUID();

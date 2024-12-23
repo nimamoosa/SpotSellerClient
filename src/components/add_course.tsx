@@ -55,7 +55,9 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
 
   useEffect(() => {
     receiverEvent("uploadFileEventReceiver", (data) => {
-      if (data.success === false) return;
+      if (data.success === false) {
+        return addAlert("آپلود عکس به مشکل خورد", "error");
+      }
 
       if (data.progress) {
         setProgress(data.progress);
@@ -138,7 +140,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     if (!file) return;
 
     // Reduce chunk size to 256KB for more frequent updates
-    const chunkSize = 128 * 1024; // 256KB per chunk
+    const chunkSize = 32 * 1024; // 256KB per chunk
     const totalChunks = Math.ceil(file.size / chunkSize);
 
     let chunkIndex = 0;
@@ -421,7 +423,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
             >
               {isLoading ? (
                 progress !== 0 ? (
-                  `${progress} درحال آپلود عکس`
+                  `${progress}% درحال آپلود عکس`
                 ) : (
                   "درحال ارسال"
                 )

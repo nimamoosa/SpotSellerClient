@@ -50,7 +50,7 @@ export default function ConnectToWordpress() {
         } else if (message.code === "rest_no_route") {
           addAlert("افزونه SpotSellerAPI روی سایت شما فعال نیست", "error");
         } else {
-          addAlert("لینک سایت اشتباه است");
+          addAlert("لینک سایت اشتباه است", "error");
         }
       } else {
         setIsSuccess(true);

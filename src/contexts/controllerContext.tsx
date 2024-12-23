@@ -32,8 +32,8 @@ function alertReducer(state: AlertState[], action: AlertAction): AlertState[] {
       return [
         ...state,
         {
-          id: Date.now().toString(), // Generate a unique ID
-          timeout: action.payload.timeout ?? 1000, // Default timeout to 1 second
+          id: Date.now().toString(),
+          timeout: action.payload.timeout ?? 3000,
           ...action.payload,
         },
       ];
@@ -67,9 +67,24 @@ interface ControllerContextProp {
   removeLink: (controller: string) => void;
 }
 
-const ControllerContext = createContext<ControllerContextProp | undefined>(
-  undefined
-);
+const ControllerContext = createContext<ControllerContextProp>({
+  auth: "",
+  setAuth: () => {},
+  code: "",
+  setCode: () => {},
+  alerts: [],
+  addAlert: () => {},
+  removeAlert: () => {},
+  clearAlerts: () => {},
+  isLoading: false,
+  setIsLoading: () => {},
+  name: "",
+  setName: () => {},
+  linkController: [],
+  setLinkController: () => {},
+  addLink: () => {},
+  removeLink: () => {},
+});
 
 export default function ControllerProvider({
   children,
@@ -86,7 +101,7 @@ export default function ControllerProvider({
 
   const [alerts, dispatchAlerts] = useReducer(alertReducer, []);
 
-  const addAlert = (text: string, type?: AlertType, timeout = 1000) => {
+  const addAlert = (text: string, type?: AlertType, timeout = 3000) => {
     const id = Date.now().toString();
     dispatchAlerts({ type: "ADD_ALERT", payload: { text, type, timeout } });
 
@@ -138,10 +153,4 @@ export default function ControllerProvider({
   );
 }
 
-export const useController = () => {
-  const context = useContext(ControllerContext);
-  if (!context) {
-    throw new Error("useController must be used within a ControllerProvider");
-  }
-  return context;
-};
+export const useController = () => useContext(ControllerContext);

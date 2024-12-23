@@ -1,23 +1,30 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useController } from "@/contexts/controllerContext";
 
 const Alert: React.FC = () => {
   const { alerts, removeAlert } = useController();
+  const timers = useRef(new Set<number>()); // Use Set to track active timers
 
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
     alerts.forEach((alert) => {
-      const timer = setTimeout(() => {
-        removeAlert(alert.id); // Automatically remove alert after timeout
-      }, alert.timeout);
-      timers.push(timer);
+      if (!timers.current.has(Number(alert.id))) {
+        const timer = setTimeout(() => {
+          removeAlert(alert.id);
+          timers.current.delete(Number(alert.id));
+        }, alert.timeout);
+
+        timers.current.add(Number(alert.id));
+      }
     });
 
     return () => {
-      timers.forEach(clearTimeout); // Cleanup timers on unmount
+      timers.current.forEach((id) => {
+        clearTimeout(id);
+      });
+      timers.current.clear();
     };
   }, [alerts, removeAlert]);
 
@@ -30,21 +37,25 @@ const Alert: React.FC = () => {
   };
 
   return (
-    <div dir="ltr">
+    <div
+      dir="ltr"
+      className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-[350px]"
+    >
       <AnimatePresence>
-        {alerts.map((alert) => (
+        {alerts.map((alert, index) => (
           <motion.div
             key={alert.id}
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.9 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className={`fixed top-4 right-4 max-w-sm w-full p-4 mb-4 rounded-2xl border-2 ${
+            layout // Automatically animates position changes
+            className={`max-w-sm w-full p-4 rounded-2xl border-2 ${
               typeStyles[alert.type || "success"]
-            } z-50`}
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`font-light`}>{alert.text}</span>
+              <span className="font-light">{alert.text}</span>
               <button
                 onClick={() => removeAlert(alert.id)}
                 className="ml-4 text-2xl rounded-xl text-white font-bold focus:outline-none active:text-black transition-colors"

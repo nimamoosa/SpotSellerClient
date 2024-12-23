@@ -7,37 +7,51 @@ import {
   SetStateAction,
   useContext,
   useEffect,
+  useReducer,
   useState,
 } from "react";
 import { useCourse } from "./courseContext";
 import { EncJET } from "@/funcs/encryptions";
 
+type FileType = {
+  file: string;
+  type: string;
+  controllerId: string;
+};
+
+type FileAction =
+  | { type: "ADD"; payload: FileType }
+  | { type: "REMOVE"; payload: { controllerId: string } };
+
+function fileReducer(state: FileType[], action: FileAction): FileType[] {
+  switch (action.type) {
+    case "ADD":
+      return [...state, action.payload];
+
+    case "REMOVE":
+      return state.filter(
+        (file) => file.controllerId !== action.payload.controllerId
+      );
+
+    default:
+      return state;
+  }
+}
+
 interface FileContextProps {
-  fileUrls: {
-    file: string;
-    type: string;
-    controllerId: string;
-  }[];
-  setFileUrls: Dispatch<
-    SetStateAction<
-      {
-        file: string;
-        type: string;
-        controllerId: string;
-      }[]
-    >
-  >;
+  fileUrls: FileType[];
+  addFile: (file: string, type: string, controllerId: string) => void;
+  removeFile: (controllerId: string) => void;
 }
 
 const FileContext = createContext<FileContextProps>({
   fileUrls: [],
-  setFileUrls: () => {},
+  addFile: () => {},
+  removeFile: () => {},
 });
 
 export default function FileProvider({ children }: { children: ReactNode }) {
-  const [fileUrls, setFileUrls] = useState<
-    { file: string; type: string; controllerId: string }[]
-  >([]);
+  const [fileUrls, dispatchFile] = useReducer(fileReducer, []);
   const { courses } = useCourse();
 
   useEffect(() => {
@@ -83,7 +97,9 @@ export default function FileProvider({ children }: { children: ReactNode }) {
           controllerId: controllerId,
         }));
 
-        setFileUrls((prev) => [...prev, ...updatedFileUrls]);
+        updatedFileUrls.forEach((file) => {
+          dispatchFile({ type: "ADD", payload: file });
+        });
       } catch (error) {
         return null;
       }
@@ -97,8 +113,16 @@ export default function FileProvider({ children }: { children: ReactNode }) {
     };
   }, [courses]);
 
+  const addFile = (file: string, type: string, controllerId: string) => {
+    dispatchFile({ type: "ADD", payload: { file, type, controllerId } });
+  };
+
+  const removeFile = (controllerId: string) => {
+    dispatchFile({ type: "REMOVE", payload: { controllerId } });
+  };
+
   return (
-    <FileContext.Provider value={{ fileUrls, setFileUrls }}>
+    <FileContext.Provider value={{ fileUrls, addFile, removeFile }}>
       {children}
     </FileContext.Provider>
   );

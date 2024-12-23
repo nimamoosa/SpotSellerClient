@@ -23,6 +23,7 @@ import { BsShop } from "react-icons/bs";
 import AmountInput from "./amount_input";
 import { useFile } from "@/contexts/fileContext";
 import { useController } from "@/contexts/controllerContext";
+import { Skeleton } from "./ui/skeleton";
 
 export default function EditCourse({
   course,
@@ -57,7 +58,7 @@ export default function EditCourse({
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { setCourses, courses } = useCourse();
   const { user } = useAuth();
-  const { fileUrls, setFileUrls } = useFile();
+  const { fileUrls, removeFile, addFile } = useFile();
   const { addAlert } = useController();
 
   useEffect(() => {
@@ -113,9 +114,7 @@ export default function EditCourse({
     receiverEvent("deleteFileEventReceiver", (data) => {
       if (data.success === false) return;
 
-      setFileUrls((prev) =>
-        prev.filter((file) => file.controllerId !== data._id)
-      );
+      removeFile(data._id);
       setIsUploaded(true);
     });
   }, []);
@@ -192,7 +191,7 @@ export default function EditCourse({
   ) => {
     if (!file) return;
 
-    const chunkSize = 1024 * 1024; // 1 MB per chunk (adjust as necessary)
+    const chunkSize = 32 * 1024; // 1 MB per chunk (adjust as necessary)
     const totalChunks = Math.ceil(file.size / chunkSize);
 
     let chunkIndex = 0;
@@ -415,9 +414,7 @@ export default function EditCourse({
                   }}
                 />
               ) : (
-                <span className="text-[18px] w-full text-[#7D7D7D]">
-                  تصویر کاور
-                </span>
+                <Skeleton className="w-[100px] h-[55px] bg-black/20" />
               )}
             </div>
 
@@ -520,11 +517,11 @@ export default function EditCourse({
               variant={"ghost"}
               className="border-[#D6D6D6] border-2 w-[100%] h-[45px] text-[16px]"
               type="submit"
-              disabled={isLoading || noChangeCourse()}
+              disabled={isLoading}
             >
               {isLoading ? (
-                progress > 100 ? (
-                  `${progress} درحال آپلود عکس`
+                progress !== 0 ? (
+                  `${progress}% درحال آپلود عکس`
                 ) : (
                   "درحال ارسال"
                 )

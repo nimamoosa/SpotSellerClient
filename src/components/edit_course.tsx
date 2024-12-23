@@ -423,6 +423,7 @@ export default function EditCourse({
                 className="bg-[#BE6D05]/10 rounded-[46px] w-full h-[40px] text-[#BE6D05] text-[17px]"
                 onClick={() => document.getElementById("choose_file")?.click()}
                 type="button"
+                disabled={isLoading}
               >
                 انتخاب فایل
               </Button>
@@ -449,11 +450,11 @@ export default function EditCourse({
       </section>
 
       <section className="mt-2">
-        <div className="flex justify-between mb-2">
-          <div>
+        <div className="flex mb-2">
+          <div className="w-[50%] flex items-center justify-start">
             <Input
               placeholder="عنوان دوره"
-              className="w-[545px] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
+              className="w-[99%] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
               name="title"
               onChange={handleChange}
               value={values.title}
@@ -461,10 +462,10 @@ export default function EditCourse({
             />
           </div>
 
-          <div>
+          <div className="w-[50%] flex items-center justify-end">
             <Input
               placeholder="شناسه دوره را وارد کنید"
-              className="w-[545px] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
+              className="w-[99%] h-[62px] rounded-[10px] border-[#D6D6D6] border-2"
               name="course_id"
               onChange={handleChange}
               value={values.course_id}
@@ -517,7 +518,7 @@ export default function EditCourse({
               variant={"ghost"}
               className="border-[#D6D6D6] border-2 w-[100%] h-[45px] text-[16px]"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || noChangeCourse()}
             >
               {isLoading ? (
                 progress !== 0 ? (

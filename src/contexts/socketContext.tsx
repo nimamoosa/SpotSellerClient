@@ -12,12 +12,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { useController } from "./controllerContext";
 
 // Create a single socket instance outside the component
 const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   transports: ["websocket"],
   reconnection: true,
-  timeout: 86400000, // Increase to 60 seconds
   reconnectionAttempts: 10,
   forceNew: true,
 });
@@ -49,6 +49,8 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
   const [clientId, setClientId] = useState(id);
   const [isReconnect, setIsReconnect] = useState(false);
 
+  const { setIsDisconnect } = useController();
+
   useEffect(() => {
     const socket = socketRef.current;
 
@@ -58,9 +60,9 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
       setIsReconnect(true);
     });
 
-    // socket.on("disconnect", () => {
-    //   console.log("Disconnected from WebSocket server");
-    // });
+    socket.on("disconnect", () => {
+      setIsDisconnect(true);
+    });
 
     return () => {
       socket.off("connect");

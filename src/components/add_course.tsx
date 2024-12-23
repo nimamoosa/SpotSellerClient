@@ -327,6 +327,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
                 className="bg-[#BE6D05]/10 rounded-[46px] w-full h-[40px] text-[#BE6D05] text-[17px]"
                 onClick={() => document.getElementById("choose_file")?.click()}
                 type="button"
+                disabled={isLoading}
               >
                 انتخاب فایل
               </Button>

@@ -242,7 +242,7 @@ export default function MainLayout({
           </section>
 
           <section
-            className="w-[97%] h-[90%] ml-auto mr-auto"
+            className="w-[97%] h-[90vh] ml-auto mr-auto"
             suppressHydrationWarning
           >
             {children}

@@ -25,10 +25,10 @@ export default function ShowCourse({
   editCourse?: (course: CourseType) => void;
   saleState?: (course: CourseType) => void;
 }) {
-  const { courses } = useCourse();
+  const { courses, setCourses } = useCourse();
 
   return (
-    <main className="w-full h-full overflow-auto">
+    <div className="w-full h-full">
       <header className="flex justify-between items-center">
         <div className="w-[50%]">
           <div>
@@ -58,7 +58,7 @@ export default function ShowCourse({
         </div>
       </header>
 
-      <main className="mt-7 w-full">
+      <main className="mt-7 w-full overflow-auto h-[67vh]">
         <Table
           className="overflow-auto rounded-lg border-2 border-[#D6D6D6]"
           style={{ borderCollapse: "separate" }}
@@ -105,6 +105,6 @@ export default function ShowCourse({
           </TableBody>
         </Table>
       </main>
-    </main>
+    </div>
   );
 }

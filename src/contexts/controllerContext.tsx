@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import React, {
   createContext,
   Dispatch,
   ReactNode,
@@ -59,6 +59,8 @@ interface ControllerContextProp {
   setIsLoading: Dispatch<React.SetStateAction<boolean>>;
   name: string;
   setName: Dispatch<React.SetStateAction<string>>;
+  isDisconnect: boolean;
+  setIsDisconnect: Dispatch<React.SetStateAction<boolean>>;
   linkController: { controller: string; link: string }[];
   setLinkController: Dispatch<
     React.SetStateAction<{ controller: string; link: string }[]>
@@ -82,6 +84,8 @@ const ControllerContext = createContext<ControllerContextProp>({
   setName: () => {},
   linkController: [],
   setLinkController: () => {},
+  isDisconnect: false,
+  setIsDisconnect: () => {},
   addLink: () => {},
   removeLink: () => {},
 });
@@ -98,6 +102,7 @@ export default function ControllerProvider({
   const [linkController, setLinkController] = useState<
     { controller: string; link: string }[]
   >([]);
+  const [isDisconnect, setIsDisconnect] = useState(false);
 
   const [alerts, dispatchAlerts] = useReducer(alertReducer, []);
 
@@ -144,6 +149,8 @@ export default function ControllerProvider({
         setName,
         linkController,
         setLinkController,
+        isDisconnect,
+        setIsDisconnect,
         addLink,
         removeLink,
       }}

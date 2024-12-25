@@ -95,8 +95,6 @@ export default function Dashboard() {
         : (() => {
             const todaysVisits = botVisits
               ?.filter((item) => {
-                console.log(item.date.split("/")[2], time.jd);
-
                 return item.date.split("/")[2] === String(time.jd);
               })
               .reduce((acc, item) => {

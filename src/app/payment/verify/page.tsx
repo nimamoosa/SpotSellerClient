@@ -52,7 +52,6 @@ export default function VerifyPayment() {
 
       if (!data.success) {
         setIsError(true);
-        addAlert("این درخواست معتبر نیست", "error");
       } else {
         setCourseId(data.courseId);
         setIsValidRequest(true);
@@ -119,7 +118,7 @@ export default function VerifyPayment() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full text-2xl font-semibold text-red-700">
         <p>درخواست معتبر نیست</p>
       </div>
     );

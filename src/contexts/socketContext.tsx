@@ -12,14 +12,26 @@ import {
   useRef,
   useState,
 } from "react";
-import { useController } from "./controllerContext";
+import useLoading from "@/hooks/useLoading";
 
 // Create a single socket instance outside the component
 const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: 10,
+  timeout: 86400000,
   forceNew: true,
+  path: "/socket-server",
+  secure: true,
+  withCredentials: true,
+  forceBase64: true,
+  query: {
+    key: process.env.NEXT_PUBLIC_API_KEY,
+  },
+  auth: {
+    email: "nimastrong852@gmail.com",
+    password: "3491f6c3-a7c1-4857-851d-3dd949bcfaa8",
+  },
 });
 
 const id = crypto.randomUUID();
@@ -34,6 +46,8 @@ interface SocketContextProps {
   clientId: string;
   isReconnect: boolean;
   setIsReconnect: Dispatch<SetStateAction<boolean>>;
+  isDisconnect: boolean;
+  setIsDisconnect: Dispatch<SetStateAction<boolean>>;
 }
 
 const SocketContext = createContext<SocketContextProps>({
@@ -42,14 +56,17 @@ const SocketContext = createContext<SocketContextProps>({
   clientId: "",
   isReconnect: false,
   setIsReconnect: () => {},
+  isDisconnect: false,
+  setIsDisconnect: () => {},
 });
 
 export default function SocketProvider({ children }: { children: ReactNode }) {
   const socketRef = useRef<Socket>(socketInstance);
   const [clientId, setClientId] = useState(id);
   const [isReconnect, setIsReconnect] = useState(false);
+  const [isDisconnect, setIsDisconnect] = useState<boolean>(false);
 
-  const { setIsDisconnect } = useController();
+  const { stopLoading } = useLoading();
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -58,10 +75,12 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
       socketInstance.emit("register", { clientId: id });
 
       setIsReconnect(true);
+      setIsDisconnect(false);
     });
 
     socket.on("disconnect", () => {
       setIsDisconnect(true);
+      stopLoading();
     });
 
     return () => {
@@ -78,6 +97,8 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
         clientId,
         isReconnect,
         setIsReconnect,
+        isDisconnect,
+        setIsDisconnect,
       }}
     >
       {children}

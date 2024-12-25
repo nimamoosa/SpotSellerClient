@@ -46,8 +46,6 @@ export default function TransactionProvider({
     receiverEvent("getTransactionsEventReceiver", (data) => {
       if (!data.success) return setIsLoadingTransaction(false);
 
-      console.log(data);
-
       setTransactions(data.data?.transactions || data.data);
       setIsLoadingTransaction(false);
     });

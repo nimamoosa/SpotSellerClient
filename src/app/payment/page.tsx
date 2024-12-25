@@ -51,7 +51,7 @@ export default function PaymentPage() {
 
   if (isCancel)
     return (
-      <div>
+      <div className="flex items-center justify-center h-full">
         <p>درخواست با موفقیت لغو شد</p>
       </div>
     );
@@ -66,7 +66,7 @@ export default function PaymentPage() {
 
   if (ipInfo?.country !== "IR") {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center h-full">
         <p>لطفا وی پی ان خود را خاموش کرده و مجدد تلاش کنید</p>
       </div>
     );
@@ -74,7 +74,7 @@ export default function PaymentPage() {
 
   if (isError) {
     return (
-      <div>
+      <div className="flex items-center justify-center h-full">
         <p>مشکلی پیش آمده است</p>
       </div>
     );
@@ -82,7 +82,7 @@ export default function PaymentPage() {
 
   if (loadingRequest) {
     return (
-      <div>
+      <div className="flex items-center justify-center h-full">
         <Spinner>درحال بررسی درخواست.....</Spinner>
       </div>
     );

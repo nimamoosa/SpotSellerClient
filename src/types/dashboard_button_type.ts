@@ -11,6 +11,7 @@ export type DashboardButtonType = {
     textClassName?: string;
   };
   href?: string;
+  disabled?: boolean;
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;

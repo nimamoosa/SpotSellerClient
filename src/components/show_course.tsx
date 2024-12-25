@@ -13,8 +13,22 @@ import {
   TableRow,
 } from "./ui/table";
 import { useCourse } from "@/contexts/courseContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CourseType } from "@/types/course";
+import useLoading from "@/hooks/useLoading";
+import { useSocketRequest } from "@/hooks/useSocketRequest";
+import { useAuth } from "@/contexts/authContext";
+import { useController } from "@/contexts/controllerContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 export default function ShowCourse({
   addCourse,
@@ -25,7 +39,34 @@ export default function ShowCourse({
   editCourse?: (course: CourseType) => void;
   saleState?: (course: CourseType) => void;
 }) {
-  const { courses, setCourses } = useCourse();
+  const [alert, setAlert] = useState<{
+    type: "error" | "success";
+    text: string;
+  }>({ type: "error", text: "" });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [item, setItem] = useState<{ _id: string } | null>(null);
+
+  const { courses, addCourse: addNewCourse, deleteCourse } = useCourse();
+  const { user } = useAuth();
+  const { startLoading, stopLoading, isLoading } = useLoading();
+  const { sendEvent, receiverEvent } = useSocketRequest();
+  const { addAlert } = useController();
+
+  useEffect(() => {
+    receiverEvent("deleteCourseEventReceiver", (data) => {
+      if (!data.success) return setAlert({ type: "error", text: data.message });
+
+      deleteCourse(data._id);
+      setAlert({ type: "success", text: "دوره با موفقیت پاک شد" });
+      stopLoading();
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!alert.text) return;
+
+    addAlert(alert.text, alert.type);
+  }, [alert]);
 
   return (
     <div className="w-full h-full">
@@ -59,51 +100,94 @@ export default function ShowCourse({
       </header>
 
       <main className="mt-7 w-full overflow-auto h-[67vh]">
-        <Table
-          className="overflow-auto rounded-lg border-2 border-[#D6D6D6]"
-          style={{ borderCollapse: "separate" }}
-        >
-          <TableHeader className="w-full">
-            <TableRow className="font-medium text-[16px]">
-              <TableHead className="w-[70%] border-l-[1px] p-4 border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
-                <p className="mr-3 w-fit">عنوان دوره</p>
-              </TableHead>
-              <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
-                <p>عملیات</p>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {courses?.map((item, index) => {
-              return (
-                <TableRow className="hover:bg-transparent" key={index}>
-                  <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
-                    <p className="mr-5">{item.title}</p>
-                  </TableCell>
-                  <TableCell className="flex justify-center">
-                    <div className="ml-2">
-                      <Button
-                        className="bg-[#66BB00]/10 rounded-[71px] text-[#519506] hover:bg-[#66BB00]/20"
-                        onClick={() => editCourse && editCourse(item)}
-                      >
-                        ویرایش
-                      </Button>
-                    </div>
+        <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-start">
+                توجه توجه
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-start">
+                آیا موافق انجام این عملیات هستید؟
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel>خیر</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  startLoading();
 
-                    <div>
-                      <Button
-                        className="bg-[#BE6D05]/10 text-[#BE6D05] rounded-[71px] hover:bg-[#BE6D05]/20"
-                        onClick={() => saleState && saleState(item)}
-                      >
-                        وضعیت فروش
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                  sendEvent("deleteCourse", {
+                    botId: user?.botId,
+                    userId: user?.userId,
+                    _id: item?._id,
+                  });
+                }}
+              >
+                بله
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <div className="border border-[#D6D6D6] rounded-xl overflow-hidden">
+          <Table className="w-full border-collapse">
+            <TableHeader className="w-full">
+              <TableRow className="font-medium text-[16px] bg-[#F6F6F6] border-b border-gray-300">
+                <TableHead className="w-[70%] border-l-[1px] p-4 border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
+                  <p className="mr-3 w-fit">عنوان دوره</p>
+                </TableHead>
+                <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
+                  <p>عملیات</p>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {courses?.map((item, index) => {
+                return (
+                  <TableRow className="hover:bg-transparent" key={index}>
+                    <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
+                      <p className="mr-5">{item.title}</p>
+                    </TableCell>
+                    <TableCell className="flex justify-evenly">
+                      <div className="-ml-2">
+                        <Button
+                          className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
+                          disabled={isLoading}
+                          onClick={() => editCourse && editCourse(item)}
+                        >
+                          ویرایش
+                        </Button>
+                      </div>
+
+                      <div>
+                        <Button
+                          className="bg-[#BE6D05]/10 text-[#BE6D05] rounded-full hover:bg-[#BE6D05]/20"
+                          disabled={isLoading}
+                          onClick={() => saleState && saleState(item)}
+                        >
+                          وضعیت فروش
+                        </Button>
+                      </div>
+
+                      <div className="-mr-2">
+                        <Button
+                          className="bg-[#BE6D05]/60 text-[#000000] rounded-full hover:bg-[#BE6D05]/50"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setOpenDialog(true);
+                            setItem({ _id: item._id });
+                          }}
+                        >
+                          حذف
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </main>
     </div>
   );

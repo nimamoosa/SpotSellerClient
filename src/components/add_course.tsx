@@ -7,14 +7,12 @@ import { Textarea } from "./ui/textarea";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
 import useLoading from "@/hooks/useLoading";
 import { useAuth } from "@/contexts/authContext";
-import { toast } from "@/hooks/use-toast";
 import { useCourse } from "@/contexts/courseContext";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -49,7 +47,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { setCourses, courses } = useCourse();
+  const { addArrayCourse, courses } = useCourse();
   const { user } = useAuth();
   const { addAlert } = useController();
 
@@ -74,7 +72,8 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     receiverEvent("createCourseEventReceiver", (data) => {
       if (!data.success) return;
 
-      setCourses(data.data.courses);
+      addArrayCourse(data.data.courses);
+
       backClick();
       stopLoading();
     });
@@ -205,6 +204,11 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
           return addAlert("شما باید حداقل یک عکس اضافه کنید", "warning");
 
         startLoading();
+
+        if (courses.some((course) => course.courseId === values.course_id)) {
+          stopLoading();
+          return addAlert("این شناسه دوره قبلا ثبت شده است", "error");
+        }
 
         return uploadFile(selectedFile, "nima", user?.userId, user?.botId);
       }}

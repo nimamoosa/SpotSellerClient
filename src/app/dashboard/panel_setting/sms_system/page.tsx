@@ -35,9 +35,9 @@ export default function SmsSystem() {
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { addAlert } = useController();
+  const { addAlert, addLink } = useController();
   const { user } = useAuth();
-  const { smsService, setSmsService } = useSmsService();
+  const { smsService } = useSmsService();
 
   useEffect(() => {
     if (!smsService) return;

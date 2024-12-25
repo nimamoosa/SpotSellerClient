@@ -73,10 +73,6 @@ export default function usePayment(
   }, [receiverEvent, addAlert]);
 
   useEffect(() => {
-    console.log(payment);
-  }, [payment]);
-
-  useEffect(() => {
     if (loadingRequest || isError) return;
     if (payment == null) return;
 

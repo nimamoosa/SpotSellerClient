@@ -16,12 +16,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { useSocket } from "@/contexts/socketContext";
 
 export default function MainResponsive({ children }: { children: ReactNode }) {
   const [isClient, setIsClient] = useState(false);
 
   const { loadingAuth } = useAuth();
-  const { isDisconnect } = useController();
+  const { isDisconnect } = useSocket();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -44,25 +45,6 @@ export default function MainResponsive({ children }: { children: ReactNode }) {
             لطفا برای استفاده از spotseller از لپ تاپ یا کامپیوتر وارد شوید
           </p>
         </div>
-      ) : isDisconnect ? (
-        <>
-          <AlertDialog open={isDisconnect}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your account and remove your data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction onClick={() => router.refresh()}>
-                  اتصال
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </>
       ) : loadingAuth && !pathname.startsWith("/payment") ? (
         <LoadingPage />
       ) : (

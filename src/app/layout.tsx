@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import SocketProvider from "../contexts/socketContext";
 import ControllerProvider from "@/contexts/controllerContext";
-import { Toaster } from "@/components/ui/toaster";
-import { ToastProvider } from "@/components/ui/toast";
 import AuthProvider from "@/contexts/authContext";
 import CourseProvider from "@/contexts/courseContext";
 import BotProvider from "@/contexts/botContext";
@@ -69,38 +67,35 @@ export default function RootLayout({
       <body
         className={`min-h-full flex items-center font-sans justify-center overflow-hidden bg-[#CEBEE4] text-black`}
       >
-        <ToastProvider>
-          <SocketProvider>
-            <AuthProvider>
-              <CourseProvider>
-                <BotProvider>
-                  <BotVisitProvider>
-                    <RegisteredUsersProvider>
-                      <BotSupportProvider>
-                        <TransactionProvider>
-                          <LicenseProvider>
-                            <PaymentProvider>
-                              <FileProvider>
-                                <ControllerProvider>
-                                  <MainResponsive>
-                                    {children}
-                                    <Toaster />
-                                    <Analytics />
-                                    <SpeedInsights />
-                                  </MainResponsive>
-                                </ControllerProvider>
-                              </FileProvider>
-                            </PaymentProvider>
-                          </LicenseProvider>
-                        </TransactionProvider>
-                      </BotSupportProvider>
-                    </RegisteredUsersProvider>
-                  </BotVisitProvider>
-                </BotProvider>
-              </CourseProvider>
-            </AuthProvider>
-          </SocketProvider>
-        </ToastProvider>
+        <SocketProvider>
+          <AuthProvider>
+            <CourseProvider>
+              <BotProvider>
+                <BotVisitProvider>
+                  <RegisteredUsersProvider>
+                    <BotSupportProvider>
+                      <TransactionProvider>
+                        <LicenseProvider>
+                          <PaymentProvider>
+                            <FileProvider>
+                              <ControllerProvider>
+                                <MainResponsive>
+                                  {children}
+                                  <Analytics />
+                                  <SpeedInsights />
+                                </MainResponsive>
+                              </ControllerProvider>
+                            </FileProvider>
+                          </PaymentProvider>
+                        </LicenseProvider>
+                      </TransactionProvider>
+                    </BotSupportProvider>
+                  </RegisteredUsersProvider>
+                </BotVisitProvider>
+              </BotProvider>
+            </CourseProvider>
+          </AuthProvider>
+        </SocketProvider>
       </body>
     </html>
   );

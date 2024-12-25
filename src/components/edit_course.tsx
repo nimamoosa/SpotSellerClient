@@ -53,17 +53,19 @@ export default function EditCourse({
   const [discountCode, setDiscountCode] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
   const [parameters, setParameters] = useState(false);
+  const [error, setError] = useState("");
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { setCourses, courses } = useCourse();
+  const { addArrayCourse, courses } = useCourse();
   const { user } = useAuth();
   const { fileUrls, removeFile, addFile } = useFile();
   const { addAlert } = useController();
 
   useEffect(() => {
     receiverEvent("editCourseEventReceiver", (data) => {
-      setCourses(data.updatedCourse.courses);
+      addArrayCourse(data.updatedCourse.courses);
+
       stopLoading();
       backClick();
     });
@@ -112,7 +114,7 @@ export default function EditCourse({
 
   useEffect(() => {
     receiverEvent("deleteFileEventReceiver", (data) => {
-      if (data.success === false) return;
+      if (data.success === false) return setError(data.message);
 
       removeFile(data._id);
       setIsUploaded(true);
@@ -120,9 +122,17 @@ export default function EditCourse({
   }, []);
 
   useEffect(() => {
+    if (!error) return;
+
+    addAlert(error, "error");
+  }, [error]);
+
+  useEffect(() => {
     if (!isUploaded) return;
     if (!user) return;
     if (!selectedFile) return;
+
+    console.log("upload file");
 
     uploadFile(selectedFile, user.name, user.userId, user.botId);
   }, [isUploaded, user, selectedFile]);
@@ -423,9 +433,9 @@ export default function EditCourse({
                 className="bg-[#BE6D05]/10 rounded-[46px] w-full h-[40px] text-[#BE6D05] text-[17px]"
                 onClick={() => document.getElementById("choose_file")?.click()}
                 type="button"
-                disabled={isLoading}
+                disabled={isLoading || !preview}
               >
-                انتخاب فایل
+                {preview ? "انتخاب فایل" : "درحال بارگذاری عکس ..."}
               </Button>
               <Input
                 type="file"
@@ -518,7 +528,7 @@ export default function EditCourse({
               variant={"ghost"}
               className="border-[#D6D6D6] border-2 w-[100%] h-[45px] text-[16px]"
               type="submit"
-              disabled={isLoading || noChangeCourse()}
+              disabled={!preview || isLoading || noChangeCourse()}
             >
               {isLoading ? (
                 progress !== 0 ? (

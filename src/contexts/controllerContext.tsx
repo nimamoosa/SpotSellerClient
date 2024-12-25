@@ -32,7 +32,7 @@ function alertReducer(state: AlertState[], action: AlertAction): AlertState[] {
       return [
         ...state,
         {
-          id: Date.now().toString(),
+          id: Buffer.from(Date.now().toString()).toString("base64"),
           timeout: action.payload.timeout ?? 3000,
           ...action.payload,
         },

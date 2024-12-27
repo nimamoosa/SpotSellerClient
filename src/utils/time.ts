@@ -1,7 +1,8 @@
 import { toJalaali } from "jalaali-js";
+import moment from "moment-timezone";
 
 // Current date in Gregorian calendar
-const date = new Date();
+const date = moment().tz("Asia/Tehran").toDate();
 
 // Convert the current date to Jalali (Persian) calendar
 export const time = toJalaali(date);

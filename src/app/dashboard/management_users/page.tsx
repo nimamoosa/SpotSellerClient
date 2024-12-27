@@ -38,6 +38,7 @@ export default function ManagementUsers() {
   const [userClick, setUserClick] = useState<RegisteredUsersType | null>(null);
   const [userPurchase, setUserPurchase] = useState<TransactionUsersType[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
 
   const { registeredUsers, setRegisteredUsers, isLoadingRegisteredUsers } =
     useRegisteredUsers();
@@ -48,7 +49,8 @@ export default function ManagementUsers() {
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   useEffect(() => {
-    if (userClick) return addLink("ویرایش کاربر", "management_of_user");
+    if (userClick && !userPurchase)
+      return addLink("ویرایش کاربر", "management_of_user");
 
     if (userPurchase.length !== 0)
       return addLink("گزارشات", "management_of_user");
@@ -71,6 +73,23 @@ export default function ManagementUsers() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!userClick || !transactions.length) return;
+    if (isEdit) return;
+
+    const relatedTransactions = transactions.filter((transaction) =>
+      transaction.users.some((user) => user.userId === userClick.userId)
+    );
+
+    const relatedUsers = relatedTransactions.flatMap(
+      (transaction) => transaction.users
+    );
+
+    if (relatedUsers.length !== userPurchase.length) {
+      setUserPurchase(relatedUsers);
+    }
+  }, [transactions, userClick, isEdit]);
+
   const handleBanedUser = useCallback(
     (userId: number, status: boolean) => {
       if (!user) return;
@@ -85,6 +104,8 @@ export default function ManagementUsers() {
   );
 
   const handleOnClick = (user: RegisteredUsersType) => {
+    setUserClick(user);
+
     const tran = transactions.filter((item) =>
       item.users.find((item) => item.userId == user.userId)
     );
@@ -104,7 +125,7 @@ export default function ManagementUsers() {
         </div>
       );
 
-    if (userClick && !openDialog)
+    if (userClick && !openDialog && userPurchase?.length === 0)
       return <EditUserInfo userClick={userClick} setUserClick={setUserClick} />;
 
     if (userPurchase?.length !== 0)
@@ -112,6 +133,7 @@ export default function ManagementUsers() {
         <ViewCustomerPurchaseHistory
           purchase={userPurchase}
           setUserPurchase={setUserPurchase}
+          setUserClick={setUserClick}
         />
       );
 
@@ -183,7 +205,10 @@ export default function ManagementUsers() {
                         className="bg-[#66BB00]/10 text-[#519506] hover:bg-[#66BB00]/20 rounded-full"
                         type="button"
                         disabled={isLoading}
-                        onClick={() => setUserClick(item)}
+                        onClick={() => {
+                          setIsEdit(true);
+                          setUserClick(item);
+                        }}
                       >
                         <Pen /> ویرایش
                       </Button>
@@ -248,5 +273,5 @@ export default function ManagementUsers() {
     );
   }, [userClick, registeredUsers, userPurchase, isLoadingRegisteredUsers]);
 
-  return <main className="h-full overflow-auto">{renderPage()}</main>;
+  return <main className="h-full">{renderPage()}</main>;
 }

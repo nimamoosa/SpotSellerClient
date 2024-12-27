@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type IPInfo = {
-  country?: string;
+  country_code?: string;
 };
 
 export default function PaymentPage() {
@@ -21,7 +21,7 @@ export default function PaymentPage() {
   const paymentId = searchParams.get("paymentId");
 
   const { isError, loadingRequest, payment, loadingCreatedLink, paymentLink } =
-    usePayment(paymentId, token, ipInfo?.country);
+    usePayment(paymentId, token, ipInfo?.country_code);
 
   useEffect(() => {
     if (!token || !paymentId) return;
@@ -64,7 +64,7 @@ export default function PaymentPage() {
     );
   }
 
-  if (ipInfo?.country !== "IR") {
+  if (ipInfo?.country_code !== "IR") {
     return (
       <div className="flex items-center justify-center h-full">
         <p>لطفا وی پی ان خود را خاموش کرده و مجدد تلاش کنید</p>

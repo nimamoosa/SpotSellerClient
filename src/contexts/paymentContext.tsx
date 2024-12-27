@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useAuth } from "./authContext";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
+import { Events, ReceiverEvents } from "@/enum/event";
 
 interface PaymentContextProps {
   payment: PaymentClientType;
@@ -36,11 +37,11 @@ export default function PaymentProvider({ children }: { children: ReactNode }) {
     if (loadingAuth) return;
     if (!user) return setIsLoadingPayment(false);
 
-    sendEvent("getClientPayment", { botId: user.botId, userId: user.userId });
+    sendEvent(Events.GET_PAYMENT, { botId: user.botId, userId: user.userId });
   }, [user, loadingAuth]);
 
   useEffect(() => {
-    receiverEvent("getClientPaymentEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.GET_PAYMENT, (data) => {
       setPayment(data.data);
       setIsLoadingPayment(false);
     });

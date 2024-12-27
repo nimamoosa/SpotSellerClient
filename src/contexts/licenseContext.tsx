@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useAuth } from "./authContext";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
+import { Events, ReceiverEvents } from "@/enum/event";
 
 interface LicenseContextProps {
   licenses: LicenseType;
@@ -35,11 +36,11 @@ export default function LicenseProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return;
 
-    sendEvent("getAllLicense", { userId: user.userId, botId: user.botId });
+    sendEvent(Events.GET_LICENSE, { userId: user.userId, botId: user.botId });
   }, [user]);
 
   useEffect(() => {
-    receiverEvent("getAllLicenseEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.GET_LICENSE, (data) => {
       setLicenses(data.data?.licenses);
       setLoadingLicenses(false);
     });

@@ -24,6 +24,7 @@ import AmountInput from "./amount_input";
 import { useFile } from "@/contexts/fileContext";
 import { useController } from "@/contexts/controllerContext";
 import { Skeleton } from "./ui/skeleton";
+import { Events, ReceiverEvents } from "@/enum/event";
 
 export default function EditCourse({
   course,
@@ -54,6 +55,7 @@ export default function EditCourse({
   const [discountAmount, setDiscountAmount] = useState(0);
   const [parameters, setParameters] = useState(false);
   const [error, setError] = useState("");
+  const [authorizationToken, setAuthorizationToken] = useState("");
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -63,7 +65,7 @@ export default function EditCourse({
   const { addAlert } = useController();
 
   useEffect(() => {
-    receiverEvent("editCourseEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.EDIT_COURSE, (data) => {
       addArrayCourse(data.updatedCourse.courses);
 
       stopLoading();
@@ -96,7 +98,7 @@ export default function EditCourse({
   }, [fileUrls, course]);
 
   useEffect(() => {
-    receiverEvent("uploadFileEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.UPLOAD_FILE, (data) => {
       if (data.success === false) return;
 
       if (data.progress) {
@@ -109,33 +111,32 @@ export default function EditCourse({
       setProgress(0);
 
       setDownloadLink(data.downloadLink);
+      setIsUploaded(true);
     });
   }, []);
 
   useEffect(() => {
-    receiverEvent("deleteFileEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.DELETE_FILE, (data) => {
       if (data.success === false) return setError(data.message);
 
       removeFile(data._id);
-      setIsUploaded(true);
     });
   }, []);
+
+  useEffect(() => {
+    if (!isUploaded) return;
+
+    sendEvent(Events.DELETE_FILE, {
+      downloadLink: course?.media_url,
+      _id: course?._id,
+    });
+  }, [isUploaded]);
 
   useEffect(() => {
     if (!error) return;
 
     addAlert(error, "error");
   }, [error]);
-
-  useEffect(() => {
-    if (!isUploaded) return;
-    if (!user) return;
-    if (!selectedFile) return;
-
-    console.log("upload file");
-
-    uploadFile(selectedFile, user.name, user.userId, user.botId);
-  }, [isUploaded, user, selectedFile]);
 
   useEffect(() => {
     if (!downloadLink) return;
@@ -157,7 +158,7 @@ export default function EditCourse({
       },
     });
 
-    sendEvent("editCourse", {
+    sendEvent(Events.EDIT_COURSE, {
       userId: user.userId,
       _id: course._id,
       updatedCourseData,
@@ -165,6 +166,22 @@ export default function EditCourse({
 
     setDownloadLink("");
   }, [downloadLink, user, values, course, discountAmount, discountCode]);
+
+  useEffect(() => {
+    if (!authorizationToken) return;
+    if (!user) return;
+    if (!selectedFile) return;
+
+    uploadFile(selectedFile, user.name, user.userId, user.botId);
+  }, [authorizationToken, user, selectedFile]);
+
+  useEffect(() => {
+    receiverEvent(ReceiverEvents.TOKEN_FOR_UPLOAD_FILE, (data) => {
+      if (!data.success) return addAlert(data.message, "error");
+
+      setAuthorizationToken(data.token);
+    });
+  }, [receiverEvent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
@@ -227,10 +244,11 @@ export default function EditCourse({
             type: "profile",
             name,
             another_data: values,
+            token: authorizationToken,
           };
 
           // Send the chunk to the server via Socket.IO
-          sendEvent("uploadFile", data);
+          sendEvent(Events.UPLOAD_FILE, data);
 
           // If there are more chunks, resolve to send the next one
           if (chunkIndex + 1 < totalChunks) {
@@ -305,12 +323,13 @@ export default function EditCourse({
       onSubmit={(e) => {
         e.preventDefault();
 
+        if (!user) return;
+
         startLoading();
 
         if (selectedFile) {
-          return sendEvent("deleteFile", {
-            downloadLink: course?.media_url,
-            _id: course?._id,
+          return sendEvent(Events.TOKEN_FOR_UPLOAD_FILE, {
+            userId: user.userId,
           });
         }
 

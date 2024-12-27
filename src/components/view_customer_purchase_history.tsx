@@ -10,13 +10,17 @@ import {
   TableRow,
 } from "./ui/table";
 import { useCourse } from "@/contexts/courseContext";
+import { ScrollArea } from "./ui/scroll-area";
+import { RegisteredUsersType } from "@/types/registeredUsersType";
 
 export default function ViewCustomerPurchaseHistory({
   purchase,
   setUserPurchase,
+  setUserClick,
 }: {
   purchase: TransactionUsersType[];
   setUserPurchase: Dispatch<SetStateAction<TransactionUsersType[]>>;
+  setUserClick: Dispatch<SetStateAction<RegisteredUsersType | null>>;
 }) {
   const { courses } = useCourse();
 
@@ -52,12 +56,19 @@ export default function ViewCustomerPurchaseHistory({
         </div>
 
         <div>
-          <Button onClick={() => setUserPurchase([])}>بازگشت</Button>
+          <Button
+            onClick={() => {
+              setUserPurchase([]);
+              setUserClick(null);
+            }}
+          >
+            بازگشت
+          </Button>
         </div>
       </div>
 
-      <div className="overflow-auto">
-        <div className="border border-[#D6D6D6] rounded-lg overflow-hidden mt-5">
+      <ScrollArea className="h-[70vh] mt-5">
+        <div className="border border-[#D6D6D6] rounded-lg overflow-hidden">
           <Table className="w-full border-collapse" dir="ltr">
             <TableHeader>
               <TableRow className="bg-[#F6F6F6] border-b border-gray-300 *:p-5">
@@ -69,6 +80,7 @@ export default function ViewCustomerPurchaseHistory({
                 </TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {purchase.map((item, index) => (
                 <TableRow
@@ -93,7 +105,7 @@ export default function ViewCustomerPurchaseHistory({
             </TableBody>
           </Table>
         </div>
-      </div>
+      </ScrollArea>
     </section>
   );
 }

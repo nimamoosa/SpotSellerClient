@@ -553,13 +553,13 @@ export default function MainLayout({
           </section>
         </header>
 
-        <main className="w-full h-[90vh] flex flex-col items-center rounded-tr-[37px] bg-white">
+        <main className="w-full h-full flex flex-col items-center rounded-tr-[37px] bg-white">
           <section
             slot="top"
             className="h-[10vh] w-[95%] flex items-center p-2"
           >
             <div className="flex items-center w-[50%] h-[10vh] ml-auto mr-auto text-xl font-semibold">
-              <span className="flex">
+              <span className="flex items-center justify-center">
                 پنل ناشر <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
                 <span>
                   {buttons

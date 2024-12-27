@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useAuth } from "./authContext";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
+import { Events, ReceiverEvents } from "@/enum/event";
 
 interface RegisteredUsersContextProps {
   registeredUsers: RegisteredUsersType[];
@@ -42,15 +43,17 @@ export default function RegisteredUsersProvider({
   useEffect(() => {
     if (user === null) return;
 
-    sendEvent("registeredUsers", { userId: user.userId });
+    sendEvent(Events.SIGNUP_USERS, { userId: user.userId });
+  }, [user]);
 
-    receiverEvent("registeredUsersEventReceiver", (data) => {
+  useEffect(() => {
+    receiverEvent(ReceiverEvents.SIGNUP_USERS, (data) => {
       if (!data.success) return setIsLoadingRegisteredUsers(false);
 
       setRegisteredUsers(data.users);
       setIsLoadingRegisteredUsers(false);
     });
-  }, [user]);
+  }, []);
 
   return (
     <RegisteredUsersContext.Provider

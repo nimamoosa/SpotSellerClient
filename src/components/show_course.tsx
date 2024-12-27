@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Search } from "lucide-react";
+import { ChartColumn, Pen, Plus, Search } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { BsBucket } from "react-icons/bs";
 
 export default function ShowCourse({
   addCourse,
@@ -148,14 +149,14 @@ export default function ShowCourse({
                     <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
                       <p className="mr-5">{item.title}</p>
                     </TableCell>
-                    <TableCell className="flex justify-evenly">
+                    <TableCell className="flex justify-between gap-5">
                       <div className="-ml-2">
                         <Button
                           className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
                           disabled={isLoading}
                           onClick={() => editCourse && editCourse(item)}
                         >
-                          ویرایش
+                          <Pen /> ویرایش
                         </Button>
                       </div>
 
@@ -165,20 +166,20 @@ export default function ShowCourse({
                           disabled={isLoading}
                           onClick={() => saleState && saleState(item)}
                         >
-                          وضعیت فروش
+                          <ChartColumn /> وضعیت فروش
                         </Button>
                       </div>
 
                       <div className="-mr-2">
                         <Button
-                          className="bg-[#BE6D05]/60 text-[#000000] rounded-full hover:bg-[#BE6D05]/50"
+                          className="bg-red-700/90 text-white hover:bg-red-700/80 rounded-full"
                           disabled={isLoading}
                           onClick={() => {
                             setOpenDialog(true);
                             setItem({ _id: item._id });
                           }}
                         >
-                          حذف
+                          <BsBucket /> حذف دوره
                         </Button>
                       </div>
                     </TableCell>

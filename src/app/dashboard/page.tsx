@@ -17,6 +17,7 @@ import { useBotVisit } from "@/contexts/botVisitContext";
 import { useCourse } from "@/contexts/courseContext";
 import { useRegisteredUsers } from "@/contexts/registeredUsersContext";
 import { useTransaction } from "@/contexts/transactionContext";
+import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { subtractOneDayFromJalaali, time } from "@/utils/time";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const { isLoadingTransactions, transactions } = useTransaction();
   const { registeredUsers, isLoadingRegisteredUsers } = useRegisteredUsers();
   const { courses, isLoadingCourse } = useCourse();
+  const { sendEvent, receiverEvent } = useSocketRequest();
 
   const cards = [
     {
@@ -127,18 +129,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (!botVisits?.length && !transactions?.length) return;
 
-    // گرفتن آخرین 30 ورودی از botVisits یا ایجاد لیست خالی
     const lastTenBotVisits = botVisits?.slice(-30) || [];
 
-    // استخراج تمام تاریخ‌ها از transactions و botVisits
     const allDates = new Set(
       [
         ...transactions.map((transaction) => transaction.date),
         ...lastTenBotVisits.map((botVisit) => botVisit.date),
-      ].filter(Boolean) // حذف مقادیر null یا undefined
+      ].filter(Boolean)
     );
 
-    // بررسی و تطابق داده‌های transactions و botVisits
     const filterBotVisit = Array.from(allDates)
       .map((date) => {
         const matchingBotVisit = lastTenBotVisits.find(
@@ -157,9 +156,8 @@ export default function Dashboard() {
           date,
         };
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // مرتب‌سازی بر اساس تاریخ
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // افزودن تاریخ‌های گم‌شده تا رسیدن به 30 تاریخ
     while (filterBotVisit.length < 30) {
       const lastDate = filterBotVisit[0]?.date;
 
@@ -176,7 +174,6 @@ export default function Dashboard() {
       });
     }
 
-    // تنظیم داده‌های نمودار
     setChartData(filterBotVisit);
   }, [botVisits, transactions]);
 

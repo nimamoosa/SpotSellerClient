@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -21,8 +21,7 @@ import { randomBytes } from "crypto";
 import { BsShop } from "react-icons/bs";
 import AmountInput from "./amount_input";
 import { useController } from "@/contexts/controllerContext";
-
-const CHUNK_SIZE = 1024 * 1024;
+import { Events, ReceiverEvents } from "@/enum/event";
 
 export default function AddCourse({ backClick }: { backClick: () => void }) {
   const [values, setValues] = useState<{
@@ -44,6 +43,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
   const [alertType, setAlertType] = useState("");
   const [discountCode, setDiscountCode] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [authorizationToken, setAuthorizationToken] = useState("");
 
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -52,7 +52,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
   const { addAlert } = useController();
 
   useEffect(() => {
-    receiverEvent("uploadFileEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.UPLOAD_FILE, (data) => {
       if (data.success === false) {
         return addAlert("آپلود عکس به مشکل خورد", "error");
       }
@@ -65,11 +65,12 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
       if (!data.downloadLink) return;
 
       setDownloadLink(data.downloadLink);
+      setAuthorizationToken("");
     });
   }, []);
 
   useEffect(() => {
-    receiverEvent("createCourseEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.CREATE_COURSE, (data) => {
       if (!data.success) return;
 
       addArrayCourse(data.data.courses);
@@ -84,7 +85,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     if (!user) return;
     if (!values) return;
 
-    sendEvent("createCourse", {
+    sendEvent(Events.CREATE_COURSE, {
       course: {
         courseId: values.course_id,
         title: values.title,
@@ -102,6 +103,22 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
 
     setDownloadLink("");
   }, [downloadLink, user, values, discountCode, discountAmount]);
+
+  useEffect(() => {
+    if (!authorizationToken) return;
+    if (!user) return;
+    if (!selectedFile) return;
+
+    uploadFile(selectedFile, user.name, user.userId, user.botId);
+  }, [authorizationToken, user, selectedFile, sendEvent]);
+
+  useEffect(() => {
+    receiverEvent(ReceiverEvents.TOKEN_FOR_UPLOAD_FILE, (data) => {
+      if (!data.success) return addAlert(data.message, "error");
+
+      setAuthorizationToken(data.token);
+    });
+  }, [receiverEvent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
@@ -162,9 +179,10 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
             botId,
             type: "profile",
             name,
+            token: authorizationToken,
           };
 
-          sendEvent("uploadFile", data);
+          sendEvent(Events.UPLOAD_FILE, data);
 
           if (chunkIndex + 1 < totalChunks) {
             chunkIndex++;
@@ -210,7 +228,9 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
           return addAlert("این شناسه دوره قبلا ثبت شده است", "error");
         }
 
-        return uploadFile(selectedFile, "nima", user?.userId, user?.botId);
+        return sendEvent(Events.TOKEN_FOR_UPLOAD_FILE, {
+          userId: user?.userId,
+        });
       }}
     >
       <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>

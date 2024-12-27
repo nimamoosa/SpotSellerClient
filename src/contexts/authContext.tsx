@@ -13,6 +13,7 @@ import {
   useState,
 } from "react";
 import { useSocket } from "./socketContext";
+import { Events, ReceiverEvents } from "@/enum/event";
 
 interface AuthContextProps {
   user: AuthType | null;
@@ -32,7 +33,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const { startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { clientId, isReconnect, setIsReconnect } = useSocket();
+  const { clientId, isReconnect, setIsReconnect, socket } = useSocket();
 
   useEffect(() => {
     startLoading();
@@ -40,18 +41,21 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const getSession = async () => {
       const response = await fetch("/api/auth");
 
-      if (response.status !== 200) return stopLoading();
+      if (response.status !== 200) {
+        setLoadingAuth(false);
+        return stopLoading();
+      }
 
       const json = await response.json();
 
-      sendEvent("getAuth", { sessionId: json.sessionId.value });
+      sendEvent(Events.GET_AUTH, { sessionId: json.sessionId.value });
     };
 
     getSession();
   }, []);
 
   useEffect(() => {
-    receiverEvent("getAuthEventReceiver", (data) => {
+    receiverEvent(ReceiverEvents.GET_AUTH, (data) => {
       if (data.success == false) {
         setLoadingAuth(false);
         setUser(null);
@@ -67,6 +71,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     if (!clientId) return;
 
     sendEvent("registerId", { clientId, botId: user.botId });
+    socket.emit("registerBot", { botId: user.botId });
   }, [user, clientId]);
 
   useEffect(() => {

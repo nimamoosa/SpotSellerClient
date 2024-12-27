@@ -1,6 +1,6 @@
 import { TransactionUsersType } from "@/types/visit";
 import { Button } from "./ui/button";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -23,6 +23,10 @@ export default function ViewCustomerPurchaseHistory({
   setUserClick: Dispatch<SetStateAction<RegisteredUsersType | null>>;
 }) {
   const { courses } = useCourse();
+
+  useEffect(() => {
+    console.log(purchase.filter((item) => item.type === "cancel").length);
+  }, [purchase]);
 
   const successButton = () => {
     return (

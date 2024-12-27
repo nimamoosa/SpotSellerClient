@@ -44,7 +44,7 @@ export default function ManagementUsers() {
     useRegisteredUsers();
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { user } = useAuth();
-  const { transactions } = useTransaction();
+  const { transactions, isLoadingTransactions } = useTransaction();
   const { addLink, removeLink, addAlert } = useController();
   const { isLoading, startLoading, stopLoading } = useLoading();
 
@@ -72,6 +72,30 @@ export default function ManagementUsers() {
       setRegisteredUsers(data.data.authentications);
     });
   }, []);
+
+  useEffect(() => {
+    if (!transactions || isLoadingTransactions || !userClick) return;
+
+    const newUpdate = transactions
+      .filter((item) =>
+        item.users.find((item) => item.userId === userClick.userId)
+      )
+      .flat()
+      .flatMap((i) => i.users);
+
+    if (newUpdate.length === 0) return;
+
+    const isDifferent = newUpdate.some(
+      (user, index) =>
+        user.userId !== userPurchase[index]?.userId ||
+        user.type !== userPurchase[index]?.type
+    );
+
+    // اگر تفاوتی در userId یا نوع تغییرات وجود دارد، به روز رسانی کنیم
+    if (isDifferent) {
+      setUserPurchase(newUpdate);
+    }
+  }, [transactions, userPurchase, isLoadingTransactions, userClick]);
 
   useEffect(() => {
     if (!userClick || !transactions.length) return;

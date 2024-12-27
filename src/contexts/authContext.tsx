@@ -80,6 +80,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     sendEvent("registerId", { clientId, botId: user.botId });
+    socket.emit("registerBot", { botId: user.botId });
 
     setIsReconnect(false);
   }, [isReconnect, user, clientId]);

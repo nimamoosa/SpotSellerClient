@@ -24,10 +24,6 @@ export default function ViewCustomerPurchaseHistory({
 }) {
   const { courses } = useCourse();
 
-  useEffect(() => {
-    console.log(purchase.filter((item) => item.type === "cancel").length);
-  }, [purchase]);
-
   const successButton = () => {
     return (
       <span className="bg-[#66BB00]/10 w-[126px] h-[35px] rounded-full text-[16px] flex items-center justify-center text-[#519506]">

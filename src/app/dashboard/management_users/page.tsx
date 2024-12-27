@@ -50,14 +50,14 @@ export default function ManagementUsers() {
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   useEffect(() => {
-    if (userClick && !userPurchase)
+    if (userClick && isEdit)
       return addLink("ویرایش کاربر", "management_of_user");
 
     if (userPurchase.length !== 0)
       return addLink("گزارشات", "management_of_user");
 
     removeLink("management_of_user");
-  }, [userClick, userPurchase]);
+  }, [userClick, userPurchase, isEdit]);
 
   useEffect(() => {
     receiverEvent("updateBanStatusEventReceiver", (data) => {
@@ -118,6 +118,7 @@ export default function ManagementUsers() {
   useEffect(() => {
     if (!userClick || !transactions.length) return;
     if (isEdit) return;
+    if (isRemove) return;
 
     const relatedTransactions = transactions.filter((transaction) =>
       transaction.users.some((user) => user.userId === userClick.userId)
@@ -130,7 +131,7 @@ export default function ManagementUsers() {
     if (relatedUsers.length !== userPurchase.length) {
       setUserPurchase(relatedUsers);
     }
-  }, [transactions, userClick, isEdit]);
+  }, [transactions, userClick, isEdit, isRemove]);
 
   const handleBanedUser = useCallback(
     (userId: number, status: boolean) => {
@@ -169,7 +170,13 @@ export default function ManagementUsers() {
       );
 
     if (userClick && !openDialog && userPurchase?.length === 0)
-      return <EditUserInfo userClick={userClick} setUserClick={setUserClick} />;
+      return (
+        <EditUserInfo
+          userClick={userClick}
+          setUserClick={setUserClick}
+          setIsEdit={setIsEdit}
+        />
+      );
 
     if (!openDialog && userPurchase?.length !== 0)
       return (

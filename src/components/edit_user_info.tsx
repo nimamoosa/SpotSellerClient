@@ -20,9 +20,11 @@ import { LoadingButton } from "./ui/loading-button";
 export default function EditUserInfo({
   userClick,
   setUserClick,
+  setIsEdit,
 }: {
   userClick: RegisteredUsersType | null;
   setUserClick: Dispatch<SetStateAction<RegisteredUsersType | null>>;
+  setIsEdit: Dispatch<SetStateAction<boolean>>;
 }) {
   const [values, setValues] = useState<{ phone_number: string; name: string }>({
     phone_number: "",
@@ -67,7 +69,13 @@ export default function EditUserInfo({
   return (
     <Fragment>
       <div className="w-[99%] mb-5 flex items-center justify-end">
-        <Button className="rounded-lg" onClick={() => setUserClick(null)}>
+        <Button
+          className="rounded-lg"
+          onClick={() => {
+            setIsEdit(false);
+            setUserClick(null);
+          }}
+        >
           بازگشت
         </Button>
       </div>

@@ -39,6 +39,7 @@ export default function ManagementUsers() {
   const [userPurchase, setUserPurchase] = useState<TransactionUsersType[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [isRemove, setIsRemove] = useState(false);
 
   const { registeredUsers, setRegisteredUsers, isLoadingRegisteredUsers } =
     useRegisteredUsers();
@@ -60,6 +61,8 @@ export default function ManagementUsers() {
 
   useEffect(() => {
     receiverEvent("updateBanStatusEventReceiver", (data) => {
+      stopLoading();
+
       if (data.success == false) return;
 
       setRegisteredUsers(data.data.authentications);
@@ -74,7 +77,15 @@ export default function ManagementUsers() {
   }, []);
 
   useEffect(() => {
-    if (!transactions || isLoadingTransactions || !userClick) return;
+    if (
+      !transactions ||
+      isLoadingTransactions ||
+      !userClick ||
+      isEdit ||
+      openDialog ||
+      isRemove
+    )
+      return;
 
     const newUpdate = transactions
       .filter((item) =>
@@ -91,11 +102,18 @@ export default function ManagementUsers() {
         user.type !== userPurchase[index]?.type
     );
 
-    // اگر تفاوتی در userId یا نوع تغییرات وجود دارد، به روز رسانی کنیم
     if (isDifferent) {
       setUserPurchase(newUpdate);
     }
-  }, [transactions, userPurchase, isLoadingTransactions, userClick]);
+  }, [
+    transactions,
+    userPurchase,
+    isLoadingTransactions,
+    userClick,
+    isEdit,
+    openDialog,
+    isRemove,
+  ]);
 
   useEffect(() => {
     if (!userClick || !transactions.length) return;
@@ -117,6 +135,7 @@ export default function ManagementUsers() {
   const handleBanedUser = useCallback(
     (userId: number, status: boolean) => {
       if (!user) return;
+      if (isLoading) return;
 
       sendEvent("updateBan", {
         userId,
@@ -124,7 +143,7 @@ export default function ManagementUsers() {
         status,
       });
     },
-    [user]
+    [user, isLoading]
   );
 
   const handleOnClick = (user: RegisteredUsersType) => {
@@ -152,7 +171,7 @@ export default function ManagementUsers() {
     if (userClick && !openDialog && userPurchase?.length === 0)
       return <EditUserInfo userClick={userClick} setUserClick={setUserClick} />;
 
-    if (userPurchase?.length !== 0)
+    if (!openDialog && userPurchase?.length !== 0)
       return (
         <ViewCustomerPurchaseHistory
           purchase={userPurchase}
@@ -241,9 +260,13 @@ export default function ManagementUsers() {
                         className="bg-[#BE6D05]/10 text-[#BE6D05] hover:bg-[#BE6D05]/20 rounded-full"
                         type="button"
                         disabled={isLoading}
-                        onClick={() =>
-                          handleBanedUser(item.userId, !item.settings.is_banned)
-                        }
+                        onClick={() => {
+                          startLoading();
+                          handleBanedUser(
+                            item.userId,
+                            !item.settings.is_banned
+                          );
+                        }}
                       >
                         {item.settings.is_banned ? <Check /> : <Ban />}{" "}
                         {item.settings?.is_banned ? "فعال کردن" : "مسدود کردن"}
@@ -255,8 +278,8 @@ export default function ManagementUsers() {
                         disabled={isLoading}
                         onClick={() => {
                           setUserClick(item);
-
                           setOpenDialog(true);
+                          setIsRemove(true);
                         }}
                       >
                         <BsBucket /> حذف کاربر

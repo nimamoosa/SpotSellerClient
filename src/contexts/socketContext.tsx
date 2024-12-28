@@ -34,10 +34,40 @@ const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   },
 });
 
-const id = crypto.randomUUID();
+const id = (() => {
+  if (typeof window === "undefined") return null;
+
+  const getClientId = () => {
+    const clientId = localStorage.getItem("clientId");
+    const expirationTime = localStorage.getItem("clientIdExpiration");
+
+    if (clientId && expirationTime) {
+      const currentTime = Date.now();
+
+      if (currentTime < Number(expirationTime)) {
+        return clientId;
+      }
+
+      localStorage.removeItem("clientId");
+      localStorage.removeItem("clientIdExpiration");
+    }
+
+    const newClientId = Math.random().toString(36).substring(2, 15);
+    const newExpirationTime = Date.now() + 24 * 60 * 60 * 1000;
+
+    localStorage.setItem("clientId", newClientId);
+    localStorage.setItem("clientIdExpiration", newExpirationTime.toString());
+
+    return newClientId;
+  };
+
+  return getClientId();
+})();
 
 socketInstance.on("connect", () => {
   socketInstance.emit("register", { clientId: id });
+
+  console.log("connect:", id);
 });
 
 interface SocketContextProps {
@@ -62,7 +92,7 @@ const SocketContext = createContext<SocketContextProps>({
 
 export default function SocketProvider({ children }: { children: ReactNode }) {
   const socketRef = useRef<Socket>(socketInstance);
-  const [clientId, setClientId] = useState(id);
+  const [clientId, setClientId] = useState(id || crypto.randomUUID());
   const [isReconnect, setIsReconnect] = useState(false);
   const [isDisconnect, setIsDisconnect] = useState<boolean>(false);
 

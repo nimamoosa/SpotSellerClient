@@ -18,7 +18,7 @@ export default function MainLayout({
   const pathname = usePathname(); // Get the current path
   const [hover, setHover] = useState<number>(-1);
   const [ping, setPing] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(30 * 60);
+  const [secondsLeft, setSecondsLeft] = useState("30");
 
   const { user, setUser } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -39,21 +39,21 @@ export default function MainLayout({
     });
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const startTime = Date.now();
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const startTime = Date.now();
 
-      sendEvent("ping", {});
+  //     sendEvent("ping", {});
 
-      socket.once("pong", () => {
-        const endTime = Date.now();
-        const calculatedPing = endTime - startTime;
-        setPing(calculatedPing);
-      });
-    }, 1000);
+  //     socket.once("pong", () => {
+  //       const endTime = Date.now();
+  //       const calculatedPing = endTime - startTime;
+  //       setPing(calculatedPing);
+  //     });
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   useEffect(() => {
     switch (pathname) {
@@ -70,25 +70,25 @@ export default function MainLayout({
     }
   }, [pathname]);
 
+  // useEffect(() => {
+  //   if (isDisconnect || secondsLeft <= 0) {
+  //     return;
+  //   }
+
+  //   const timer = setInterval(() => {
+  //     setSecondsLeft((prev) => prev - 1);
+  //   }, 1000);
+
+  //   return () => clearInterval(timer);
+  // }, [secondsLeft, isDisconnect]);
+
   useEffect(() => {
-    if (isDisconnect || secondsLeft <= 0) {
-      return;
-    }
+    sendEvent("startTimer", {});
 
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [secondsLeft, isDisconnect]);
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
+    receiverEvent("timer", (data) => {
+      setSecondsLeft(data.remainingTime);
+    });
+  }, []);
 
   const buttons: {
     hover_icon: ReactNode;
@@ -489,15 +489,65 @@ export default function MainLayout({
                       : item.out_icon
                   }
                   end_icon={
-                    <img
-                      src={
-                        (item.href === "/dashboard"
-                          ? pathname === item.href
-                          : pathname.startsWith(item.href)) || hover === index
-                          ? "/icons/arrow.up.left 2.svg"
-                          : "/icons/arrow.up.left 1.svg"
-                      }
-                    />
+                    <>
+                      {(item.href === "/dashboard"
+                        ? pathname === item.href
+                        : pathname.startsWith(item.href)) || hover === index ? (
+                        <>
+                          <svg
+                            width="16"
+                            height="15"
+                            viewBox="0 0 16 15"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <g clipPath="url(#clip0_65_500)">
+                              <path
+                                d="M0 10.9695C0 11.6006 0.487497 12.0889 1.06972 12.0889C1.65018 12.0889 2.11737 11.5818 2.11737 10.9998V7.34786L1.95741 3.3076L3.5371 5.09334L12.8467 14.3994C13.0779 14.6289 13.3455 14.7387 13.6166 14.7387C14.1998 14.7387 14.7209 14.2078 14.7209 13.6424C14.7209 13.3695 14.5969 13.0957 14.3754 12.8725L5.07556 3.55488L3.29958 1.98945L7.50625 2.13339H10.9838C11.5658 2.13339 12.0648 1.66445 12.0648 1.09375C12.0648 0.521292 11.6041 0.0257874 10.9553 0.0257874H1.14687C0.448434 0.0257874 0.00625014 0.491995 0.00625014 1.16465L0 10.9695Z"
+                                fill="white"
+                                fillOpacity="0.85"
+                              />
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_65_500">
+                                <rect
+                                  width="15.0805"
+                                  height="14.7387"
+                                  fill="white"
+                                />
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            width="16"
+                            height="15"
+                            viewBox="0 0 16 15"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <g clipPath="url(#clip0_65_500)">
+                              <path
+                                d="M0 10.9695C0 11.6006 0.487497 12.0889 1.06972 12.0889C1.65018 12.0889 2.11737 11.5818 2.11737 10.9998V7.34786L1.95741 3.3076L3.5371 5.09334L12.8467 14.3994C13.0779 14.6289 13.3455 14.7387 13.6166 14.7387C14.1998 14.7387 14.7209 14.2078 14.7209 13.6424C14.7209 13.3695 14.5969 13.0957 14.3754 12.8725L5.07556 3.55488L3.29958 1.98945L7.50625 2.13339H10.9838C11.5658 2.13339 12.0648 1.66445 12.0648 1.09375C12.0648 0.521292 11.6041 0.0257874 10.9553 0.0257874H1.14687C0.448434 0.0257874 0.00625014 0.491995 0.00625014 1.16465L0 10.9695Z"
+                                fill="#6611DD"
+                                fillOpacity="0.85"
+                              />
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_65_500">
+                                <rect
+                                  width="15.0805"
+                                  height="14.7387"
+                                  fill="white"
+                                />
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </>
+                      )}
+                    </>
                   }
                   text={item.text}
                   href={item.href}
@@ -606,10 +656,10 @@ export default function MainLayout({
               <p
                 dir="ltr"
                 className={`${
-                  secondsLeft === 0 ? "text-red-600" : "text-black"
+                  secondsLeft === "0" ? "text-red-600" : "text-black"
                 } flex items-center justify-center gap-3 text-xl font-semibold`}
               >
-                {formatTime(secondsLeft)}{" "}
+                {secondsLeft}{" "}
               </p>
             </div>
           </section>

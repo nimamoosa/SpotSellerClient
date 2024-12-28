@@ -18,6 +18,7 @@ export default function MainLayout({
   const pathname = usePathname(); // Get the current path
   const [hover, setHover] = useState<number>(-1);
   const [ping, setPing] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState(30 * 60);
 
   const { user, setUser } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -68,6 +69,26 @@ export default function MainLayout({
         return removeLink("panel_setting");
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (isDisconnect || secondsLeft <= 0) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [secondsLeft, isDisconnect]);
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
   const buttons: {
     hover_icon: ReactNode;
@@ -585,23 +606,10 @@ export default function MainLayout({
               <p
                 dir="ltr"
                 className={`${
-                  ping >= 100 && ping < 150
-                    ? "text-red-500"
-                    : ping >= 150
-                    ? "text-red-700/90"
-                    : "text-green-600"
+                  secondsLeft === 0 ? "text-red-600" : "text-black"
                 } flex items-center justify-center gap-3 text-xl font-semibold`}
               >
-                {ping}{" "}
-                <span className="font-light text-lg">
-                  {ping >= 100 && ping < 150 ? (
-                    <WifiHigh />
-                  ) : ping >= 150 ? (
-                    <WifiLow />
-                  ) : (
-                    <Wifi />
-                  )}
-                </span>
+                {formatTime(secondsLeft)}{" "}
               </p>
             </div>
           </section>

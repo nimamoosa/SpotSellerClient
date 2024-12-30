@@ -7,9 +7,9 @@ import { useEffect } from "react";
 export default function Support() {
   const { removeLink } = useController();
 
-  useEffect(() => {
-    removeLink("support");
-  }, []);
+  // useEffect(() => {
+
+  // }, []);
 
   return (
     <main className="flex items-center justify-between w-full">

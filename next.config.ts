@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import type { Configuration } from "webpack";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -9,12 +10,16 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
   },
   compress: true,
-  experimental: {
-    turbo: {
-      resolveExtensions: [".js", ".jsx", ".ts", ".tsx"],
-      minify: true,
-    },
-  },
+  // webpack: (config: Configuration) => {
+  //   config.plugins = config.plugins?.filter((plugin) => {
+  //     if (plugin && typeof plugin === "object" && "constructor" in plugin) {
+  //       return plugin.constructor.name !== "DefinePlugin";
+  //     }
+  //     return true;
+  //   });
+
+  //   return config;
+  // },
 };
 
 export default nextConfig;

@@ -13,6 +13,9 @@ import {
   useState,
 } from "react";
 import useLoading from "@/hooks/useLoading";
+import { Events, OnMethod } from "@/enum/event";
+import { DecJET, EncJET } from "@/funcs/encryptions";
+import { AUTH_SOCKET } from "@/enum/secure";
 
 // Create a single socket instance outside the component
 const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
@@ -29,8 +32,8 @@ const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
     key: process.env.NEXT_PUBLIC_API_KEY,
   },
   auth: {
-    email: "nimastrong852@gmail.com",
-    password: "3491f6c3-a7c1-4857-851d-3dd949bcfaa8",
+    email: DecJET(AUTH_SOCKET.E, process.env.NEXT_PUBLIC_ENC_SECRET).message,
+    password: DecJET(AUTH_SOCKET.P, process.env.NEXT_PUBLIC_ENC_SECRET).message,
   },
 });
 
@@ -64,10 +67,8 @@ const id = (() => {
   return getClientId();
 })();
 
-socketInstance.on("connect", () => {
-  socketInstance.emit("register", { clientId: id });
-
-  console.log("connect:", id);
+socketInstance.on(OnMethod.CONNECT, () => {
+  socketInstance.emit(Events.REGISTER, { clientId: id });
 });
 
 interface SocketContextProps {
@@ -101,21 +102,21 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const socket = socketRef.current;
 
-    socket.on("connect", () => {
-      socketInstance.emit("register", { clientId: id });
+    socket.on(OnMethod.CONNECT, () => {
+      socketInstance.emit(Events.REGISTER, { clientId: id });
 
       setIsReconnect(true);
       setIsDisconnect(false);
     });
 
-    socket.on("disconnect", () => {
+    socket.on(OnMethod.DISCONNECT, () => {
       setIsDisconnect(true);
       stopLoading();
     });
 
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
+      socket.off(OnMethod.CONNECT);
+      socket.off(OnMethod.DISCONNECT);
     };
   }, []);
 

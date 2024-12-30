@@ -20,6 +20,8 @@ export default function ManagementOfCourses() {
   const { addLink, removeLink } = useController();
 
   useEffect(() => {
+    removeLink("course");
+
     switch (type) {
       case "add_course":
         addLink("افزودن دوره", "course");

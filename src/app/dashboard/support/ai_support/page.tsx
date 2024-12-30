@@ -13,13 +13,13 @@ export default function ManualSupport() {
 
   const isSetLink = useRef(false);
 
-  useEffect(() => {
-    if (isSetLink.current) return;
+  // useEffect(() => {
+  //   if (isSetLink.current) return;
 
-    isSetLink.current = true;
+  //   isSetLink.current = true;
 
-    addLink("پشتیبانی هوش مصنوعی", "support");
-  }, [isSetLink]);
+  //   addLink("پشتیبانی هوش مصنوعی", "support");
+  // }, [isSetLink]);
 
   return (
     <div className="flex gap-3 flex-col items-center h-[85%] justify-center">

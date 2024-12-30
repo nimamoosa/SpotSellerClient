@@ -15,6 +15,7 @@ import FileProvider from "@/contexts/fileContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import CooperationSalesProvider from "@/contexts/cooperationSaleContext";
 
 export const metadata: Metadata = {
   title: "Spot Seller - اسپات سلر",
@@ -78,13 +79,15 @@ export default function RootLayout({
                         <LicenseProvider>
                           <PaymentProvider>
                             <FileProvider>
-                              <ControllerProvider>
-                                <MainResponsive>
-                                  {children}
-                                  <Analytics />
-                                  <SpeedInsights />
-                                </MainResponsive>
-                              </ControllerProvider>
+                              <CooperationSalesProvider>
+                                <ControllerProvider>
+                                  <MainResponsive>
+                                    {children}
+                                    <Analytics />
+                                    <SpeedInsights />
+                                  </MainResponsive>
+                                </ControllerProvider>
+                              </CooperationSalesProvider>
                             </FileProvider>
                           </PaymentProvider>
                         </LicenseProvider>

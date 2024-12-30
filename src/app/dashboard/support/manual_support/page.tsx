@@ -27,14 +27,6 @@ export default function ManualSupport() {
   const isSetLink = useRef(false);
 
   useEffect(() => {
-    if (isSetLink.current) return;
-
-    isSetLink.current = true;
-
-    addLink("پشتیبانی دستی", "support");
-  }, [isSetLink]);
-
-  useEffect(() => {
     receiverEvent("userAvailableEventReceiver", (data) => {
       if (data.success === false) return addAlert(data.message, "error");
 

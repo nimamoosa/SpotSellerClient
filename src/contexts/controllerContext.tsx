@@ -4,6 +4,7 @@ import React, {
   createContext,
   Dispatch,
   ReactNode,
+  SetStateAction,
   useContext,
   useReducer,
   useState,
@@ -67,6 +68,12 @@ interface ControllerContextProp {
   >;
   addLink: (link: string, controller: string) => void;
   removeLink: (controller: string) => void;
+  node: { el: ReactNode | null; bgColor: string } | null;
+  setNode: Dispatch<
+    SetStateAction<{ el: ReactNode | null; bgColor: string } | null>
+  >;
+  layoutInfo: object | null;
+  setLayoutInfo: Dispatch<SetStateAction<object | null>>;
 }
 
 const ControllerContext = createContext<ControllerContextProp>({
@@ -88,6 +95,10 @@ const ControllerContext = createContext<ControllerContextProp>({
   setIsDisconnect: () => {},
   addLink: () => {},
   removeLink: () => {},
+  node: null,
+  setNode: () => {},
+  layoutInfo: null,
+  setLayoutInfo: () => {},
 });
 
 export default function ControllerProvider({
@@ -103,6 +114,11 @@ export default function ControllerProvider({
     { controller: string; link: string }[]
   >([]);
   const [isDisconnect, setIsDisconnect] = useState(false);
+  const [node, setNode] = useState<{
+    el: ReactNode | null;
+    bgColor: string;
+  } | null>(null);
+  const [layoutInfo, setLayoutInfo] = useState<object | null>(null);
 
   const [alerts, dispatchAlerts] = useReducer(alertReducer, []);
 
@@ -124,8 +140,16 @@ export default function ControllerProvider({
     dispatchAlerts({ type: "CLEAR_ALERTS" });
   };
 
-  const addLink = (link: string, controller: string) =>
+  const addLink = (link: string, controller: string) => {
+    if (
+      linkController.some(
+        (item) => item.link === link && item.controller === controller
+      )
+    )
+      return;
+
     setLinkController((prev) => [...prev, { link, controller }]);
+  };
 
   const removeLink = (controller: string) =>
     setLinkController((prev) =>
@@ -153,6 +177,10 @@ export default function ControllerProvider({
         setIsDisconnect,
         addLink,
         removeLink,
+        node,
+        setNode,
+        layoutInfo,
+        setLayoutInfo,
       }}
     >
       {children}

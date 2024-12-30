@@ -8,6 +8,7 @@ export enum Events {
   GET_LICENSE = "getAllLicense",
   GET_PAYMENT = "getClientPayment",
   SIGNUP_USERS = "registeredUsers",
+  REGISTER = "register",
 }
 
 export enum ReceiverEvents {
@@ -20,4 +21,9 @@ export enum ReceiverEvents {
   GET_LICENSE = "getAllLicenseEventReceiver",
   GET_PAYMENT = "getClientPaymentEventReceiver",
   SIGNUP_USERS = "registeredUsersEventReceiver",
+}
+
+export enum OnMethod {
+  CONNECT = "connect",
+  DISCONNECT = "disconnect",
 }

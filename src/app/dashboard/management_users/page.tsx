@@ -31,6 +31,7 @@ import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { RegisteredUsersType } from "@/types/registeredUsersType";
 import { TransactionUsersType } from "@/types/visit";
 import { Ban, Check, Pen } from "lucide-react";
+import Link from "next/link";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { BsBucket } from "react-icons/bs";
 
@@ -219,6 +220,14 @@ export default function ManagementUsers() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          <div className="mb-5">
+            <div>
+              <Link href="management_users/send_message">
+                <Button className="p-5">ارسال پیام</Button>
+              </Link>
+            </div>
+          </div>
 
           <div className="border border-[#D6D6D6] rounded-lg overflow-hidden">
             <Table className="w-full border-collapse" dir="ltr">

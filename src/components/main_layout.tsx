@@ -7,10 +7,11 @@ import { useController } from "@/contexts/controllerContext";
 import { useSocket } from "@/contexts/socketContext";
 import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
-import { Wifi, WifiHigh, WifiLow } from "lucide-react";
+import { Webhook, Wifi, WifiHigh, WifiLow } from "lucide-react";
 import { usePathname } from "next/navigation"; // Import usePathname
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
+import { ScrollArea } from "./ui/scroll-area";
 
 export default function MainLayout({
   children,
@@ -56,17 +57,29 @@ export default function MainLayout({
   // }, []);
 
   useEffect(() => {
+    removeLink("panel_setting");
+    removeLink("support");
+    removeLink("management_of_user");
+    removeLink("course");
+    removeLink("send_message");
+
     switch (pathname) {
       case "/dashboard/panel_setting/sms_system":
-        removeLink("panel_setting");
+        // removeLink("panel_setting");
         return addLink("تنظیمات پیامکی", "panel_setting");
 
       case "/dashboard/panel_setting/general_settings":
-        removeLink("panel_setting");
+        // removeLink("panel_setting");
         return addLink("تنظیمات اطلاعات عمومی", "panel_setting");
 
-      default:
-        return removeLink("panel_setting");
+      case "/dashboard/support/ai_support":
+        return addLink("پشتیبانی هوش مصنوعی", "support");
+
+      case "/dashboard/support/manual_support":
+        return addLink("پشتیبانی دستی", "support");
+
+      case "/dashboard/management_users/send_message":
+        return addLink("ارسال پیام", "send_message");
     }
   }, [pathname]);
 
@@ -449,6 +462,22 @@ export default function MainLayout({
       href: "/dashboard/connect_to_wordpress",
       text: "اتصال به وردپرس",
     },
+    {
+      hover_icon: (
+        <>
+          <Webhook />
+        </>
+      ),
+      out_icon: <></>,
+      href: "/dashboard/create_site",
+      text: "ساخت سایت",
+    },
+    {
+      hover_icon: <></>,
+      out_icon: <></>,
+      href: "/dashboard/cooperation_in_sales",
+      text: "همکاری در فروش",
+    },
   ];
 
   const handleSubmit = useCallback(() => {
@@ -472,130 +501,138 @@ export default function MainLayout({
             </div>
           </div>
 
-          <div className="w-full flex flex-col justify-center items-center mt-3 gap-1">
-            {buttons.map((item, index) => (
-              <div
-                className="mt-2 flex items-center justify-center w-full"
-                key={index}
-              >
-                <DashboardButton
-                  disabled={isDisconnect}
-                  start_icon={
-                    hover === index ||
-                    (item.href === "/dashboard"
-                      ? pathname === item.href // دقیقاً فقط `/dashboard`
-                      : pathname.startsWith(item.href)) // بقیه دکمه‌ها
-                      ? item.hover_icon
-                      : item.out_icon
-                  }
-                  end_icon={
-                    <>
-                      {(item.href === "/dashboard"
-                        ? pathname === item.href
-                        : pathname.startsWith(item.href)) || hover === index ? (
-                        <>
-                          <svg
-                            width="16"
-                            height="15"
-                            viewBox="0 0 16 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <g clipPath="url(#clip0_65_500)">
-                              <path
-                                d="M0 10.9695C0 11.6006 0.487497 12.0889 1.06972 12.0889C1.65018 12.0889 2.11737 11.5818 2.11737 10.9998V7.34786L1.95741 3.3076L3.5371 5.09334L12.8467 14.3994C13.0779 14.6289 13.3455 14.7387 13.6166 14.7387C14.1998 14.7387 14.7209 14.2078 14.7209 13.6424C14.7209 13.3695 14.5969 13.0957 14.3754 12.8725L5.07556 3.55488L3.29958 1.98945L7.50625 2.13339H10.9838C11.5658 2.13339 12.0648 1.66445 12.0648 1.09375C12.0648 0.521292 11.6041 0.0257874 10.9553 0.0257874H1.14687C0.448434 0.0257874 0.00625014 0.491995 0.00625014 1.16465L0 10.9695Z"
-                                fill="white"
-                                fillOpacity="0.85"
-                              />
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_65_500">
-                                <rect
-                                  width="15.0805"
-                                  height="14.7387"
+          <ScrollArea
+            dir="rtl"
+            className="w-full overflow-auto h-[90vh] flex flex-col items-center mt-3 gap-1"
+          >
+            {buttons.map((item, index) => {
+              return (
+                <div
+                  className="mt-2 flex items-center justify-center w-full"
+                  key={index}
+                >
+                  <DashboardButton
+                    disabled={isDisconnect}
+                    start_icon={
+                      hover === index ||
+                      (item.href === "/dashboard"
+                        ? pathname === item.href // دقیقاً فقط `/dashboard`
+                        : pathname.startsWith(item.href)) // بقیه دکمه‌ها
+                        ? item.hover_icon
+                        : item.out_icon
+                    }
+                    end_icon={
+                      <>
+                        {(item.href === "/dashboard"
+                          ? pathname === item.href
+                          : pathname.startsWith(item.href)) ||
+                        hover === index ? (
+                          <>
+                            <svg
+                              width="16"
+                              height="15"
+                              viewBox="0 0 16 15"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g clipPath="url(#clip0_65_500)">
+                                <path
+                                  d="M0 10.9695C0 11.6006 0.487497 12.0889 1.06972 12.0889C1.65018 12.0889 2.11737 11.5818 2.11737 10.9998V7.34786L1.95741 3.3076L3.5371 5.09334L12.8467 14.3994C13.0779 14.6289 13.3455 14.7387 13.6166 14.7387C14.1998 14.7387 14.7209 14.2078 14.7209 13.6424C14.7209 13.3695 14.5969 13.0957 14.3754 12.8725L5.07556 3.55488L3.29958 1.98945L7.50625 2.13339H10.9838C11.5658 2.13339 12.0648 1.66445 12.0648 1.09375C12.0648 0.521292 11.6041 0.0257874 10.9553 0.0257874H1.14687C0.448434 0.0257874 0.00625014 0.491995 0.00625014 1.16465L0 10.9695Z"
                                   fill="white"
+                                  fillOpacity="0.85"
                                 />
-                              </clipPath>
-                            </defs>
-                          </svg>
-                        </>
-                      ) : (
-                        <>
-                          <svg
-                            width="16"
-                            height="15"
-                            viewBox="0 0 16 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <g clipPath="url(#clip0_65_500)">
-                              <path
-                                d="M0 10.9695C0 11.6006 0.487497 12.0889 1.06972 12.0889C1.65018 12.0889 2.11737 11.5818 2.11737 10.9998V7.34786L1.95741 3.3076L3.5371 5.09334L12.8467 14.3994C13.0779 14.6289 13.3455 14.7387 13.6166 14.7387C14.1998 14.7387 14.7209 14.2078 14.7209 13.6424C14.7209 13.3695 14.5969 13.0957 14.3754 12.8725L5.07556 3.55488L3.29958 1.98945L7.50625 2.13339H10.9838C11.5658 2.13339 12.0648 1.66445 12.0648 1.09375C12.0648 0.521292 11.6041 0.0257874 10.9553 0.0257874H1.14687C0.448434 0.0257874 0.00625014 0.491995 0.00625014 1.16465L0 10.9695Z"
-                                fill="#6611DD"
-                                fillOpacity="0.85"
-                              />
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_65_500">
-                                <rect
-                                  width="15.0805"
-                                  height="14.7387"
-                                  fill="white"
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_65_500">
+                                  <rect
+                                    width="15.0805"
+                                    height="14.7387"
+                                    fill="white"
+                                  />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              width="16"
+                              height="15"
+                              viewBox="0 0 16 15"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g clipPath="url(#clip0_65_500)">
+                                <path
+                                  d="M0 10.9695C0 11.6006 0.487497 12.0889 1.06972 12.0889C1.65018 12.0889 2.11737 11.5818 2.11737 10.9998V7.34786L1.95741 3.3076L3.5371 5.09334L12.8467 14.3994C13.0779 14.6289 13.3455 14.7387 13.6166 14.7387C14.1998 14.7387 14.7209 14.2078 14.7209 13.6424C14.7209 13.3695 14.5969 13.0957 14.3754 12.8725L5.07556 3.55488L3.29958 1.98945L7.50625 2.13339H10.9838C11.5658 2.13339 12.0648 1.66445 12.0648 1.09375C12.0648 0.521292 11.6041 0.0257874 10.9553 0.0257874H1.14687C0.448434 0.0257874 0.00625014 0.491995 0.00625014 1.16465L0 10.9695Z"
+                                  fill="#6611DD"
+                                  fillOpacity="0.85"
                                 />
-                              </clipPath>
-                            </defs>
-                          </svg>
-                        </>
-                      )}
-                    </>
-                  }
-                  text={item.text}
-                  href={item.href}
-                  className={{
-                    className: `${
-                      (
-                        item.href === "/dashboard"
-                          ? pathname === item.href
-                          : pathname.startsWith(item.href)
-                      )
-                        ? "bg-[#7D35E2]"
-                        : "bg-white hover:bg-[#955AE8] hover:text-white"
-                    }`,
-                    endIconClassName: `${
-                      (
-                        item.href === "/dashboard"
-                          ? pathname === item.href
-                          : pathname.startsWith(item.href)
-                      )
-                        ? "text-white"
-                        : ""
-                    }`,
-                    textClassName: `${
-                      (
-                        item.href === "/dashboard"
-                          ? pathname === item.href
-                          : pathname.startsWith(item.href)
-                      )
-                        ? "text-white"
-                        : ""
-                    }`,
-                    startIconClassName: `${
-                      (
-                        item.href === "/dashboard"
-                          ? pathname === item.href
-                          : pathname.startsWith(item.href)
-                      )
-                        ? "text-black"
-                        : ""
-                    }`,
-                  }}
-                  onClick={() => setHover(index)}
-                  onMouseOut={() => setHover(-1)}
-                  onMouseOver={() => setHover(index)}
-                />
-              </div>
-            ))}
-          </div>
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_65_500">
+                                  <rect
+                                    width="15.0805"
+                                    height="14.7387"
+                                    fill="white"
+                                  />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </>
+                        )}
+                      </>
+                    }
+                    text={item.text}
+                    href={item.href}
+                    className={{
+                      className: `${
+                        buttons.length === index + 1 ? "mb-9" : ""
+                      } ${
+                        (
+                          item.href === "/dashboard"
+                            ? pathname === item.href
+                            : pathname.startsWith(item.href)
+                        )
+                          ? "bg-[#7D35E2]"
+                          : "bg-white hover:bg-[#955AE8] hover:text-white"
+                      }`,
+                      endIconClassName: `${
+                        (
+                          item.href === "/dashboard"
+                            ? pathname === item.href
+                            : pathname.startsWith(item.href)
+                        )
+                          ? "text-white"
+                          : ""
+                      }`,
+                      textClassName: `${
+                        (
+                          item.href === "/dashboard"
+                            ? pathname === item.href
+                            : pathname.startsWith(item.href)
+                        )
+                          ? "text-white"
+                          : ""
+                      }`,
+                      startIconClassName: `${
+                        (
+                          item.href === "/dashboard"
+                            ? pathname === item.href
+                            : pathname.startsWith(item.href)
+                        )
+                          ? "text-black"
+                          : ""
+                      }`,
+                    }}
+                    onClick={() => setHover(index)}
+                    onMouseOut={() => setHover(-1)}
+                    onMouseOver={() => setHover(index)}
+                  />
+                </div>
+              );
+            })}
+          </ScrollArea>
         </aside>
       </section>
 
@@ -665,12 +702,18 @@ export default function MainLayout({
           </section>
 
           <section
-            className={`w-[95%] h-[80vh]`}
+            className={`w-[95%] h-[77vh] relative mt-5`}
             slot="main"
             suppressHydrationWarning
           >
             {isDisconnect && (
-              <div className="fixed left-0 top-[10vh] w-[75%] h-[90vh] z-50 flex items-center justify-center">
+              <div
+                className={`fixed z-50 flex items-center justify-center ${
+                  pathname === "/dashboard/create_site"
+                    ? "bg-black/90 w-full h-full top-0 left-0"
+                    : "left-0 top-[10vh] w-[75%] h-[90vh]"
+                }`}
+              >
                 <div
                   className="bg-red-800/95 text-white text-2xl rounded-2xl shadow-lg p-5"
                   dir="ltr"
@@ -683,7 +726,13 @@ export default function MainLayout({
             )}
 
             <div
-              className={`h-[77vh] mt-5 ${isDisconnect ? "opacity-50" : ""}`}
+              className={`h-[100%] w-full inset-0 ${
+                isDisconnect && pathname !== "/dashboard/create_site"
+                  ? "opacity-50"
+                  : isDisconnect && pathname === "/dashboard/create_site"
+                  ? ""
+                  : ""
+              }`}
             >
               {children}
             </div>

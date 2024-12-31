@@ -22,6 +22,7 @@ import { BsShop } from "react-icons/bs";
 import AmountInput from "./amount_input";
 import { useController } from "@/contexts/controllerContext";
 import { Events, ReceiverEvents } from "@/enum/event";
+import Compressor from "compressorjs";
 
 export default function AddCourse({ backClick }: { backClick: () => void }) {
   const [values, setValues] = useState<{
@@ -155,20 +156,62 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
   ) => {
     if (!file) return;
 
-    // Reduce chunk size to 256KB for more frequent updates
-    const chunkSize = 32 * 1024; // 256KB per chunk
+    const chunkSize = 32 * 1024; // 32KB per chunk
     const totalChunks = Math.ceil(file.size / chunkSize);
-
     let chunkIndex = 0;
 
-    const sendChunk = () => {
-      const reader = new FileReader();
-      const start = chunkIndex * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
+    const compressFile = (
+      file: File,
+      maxSizeInMB: number = 1,
+      quality: number = 0.5
+    ): Promise<File> => {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          reject(new Error("No file provided for compression."));
+          return;
+        }
 
-      const chunk = file.slice(start, end);
+        // Check if the file is already under the size limit
+        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+        if (file.size <= maxSizeInBytes) {
+          resolve(file);
+          return;
+        }
 
+        new Compressor(file, {
+          quality, // Initial quality setting
+          maxWidth: 1920, // Set max width for resizing (optional)
+          maxHeight: 1080, // Set max height for resizing (optional)
+          convertSize: maxSizeInBytes, // Automatically compress if larger than max size
+          mimeType: "image/webp", // Convert to WebP format using mimeType
+          success(compressedFile) {
+            // Verify compressed file size
+            if (compressedFile.size <= maxSizeInBytes) {
+              resolve(compressedFile as File);
+            } else {
+              // Further compress if needed
+              reject(
+                new Error(
+                  "File could not be compressed under the desired size."
+                )
+              );
+            }
+          },
+          error(err) {
+            reject(err);
+          },
+        });
+      });
+    };
+
+    const sendChunk = (file: File) => {
       return new Promise<void>((resolve, reject) => {
+        const reader = new FileReader();
+        const start = chunkIndex * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+
+        const chunk = file.slice(start, end);
+
         reader.onloadend = () => {
           const data = {
             chunk: reader.result,
@@ -177,7 +220,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
             filename: file.name,
             userId,
             botId,
-            type: "profile",
+            type: "images",
             name,
             token: authorizationToken,
           };
@@ -196,21 +239,25 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
           console.error("Upload error:", error);
           reject(error);
         };
+
         reader.readAsDataURL(chunk);
       });
     };
 
-    const uploadChunksSequentially = async () => {
+    const uploadChunksSequentially = async (compressedFile: File) => {
       try {
         for (let i = chunkIndex; i < totalChunks; i++) {
-          await sendChunk();
+          await sendChunk(compressedFile);
         }
       } catch (error) {
         console.error("Upload error:", error);
       }
     };
 
-    uploadChunksSequentially();
+    // Compress and upload
+    compressFile(file).then((compressedFile) => {
+      uploadChunksSequentially(compressedFile);
+    });
   };
 
   return (

@@ -8,7 +8,7 @@ import { useSocket } from "@/contexts/socketContext";
 import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { Webhook, Wifi, WifiHigh, WifiLow } from "lucide-react";
-import { usePathname } from "next/navigation"; // Import usePathname
+import { usePathname, useRouter } from "next/navigation"; // Import usePathname
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 import { ScrollArea } from "./ui/scroll-area";
@@ -16,93 +16,6 @@ import { ScrollArea } from "./ui/scroll-area";
 export default function MainLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  const pathname = usePathname(); // Get the current path
-  const [hover, setHover] = useState<number>(-1);
-  const [ping, setPing] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState("30");
-
-  const { user, setUser } = useAuth();
-  const { isLoading, startLoading, stopLoading } = useLoading();
-  const { sendEvent, receiverEvent } = useSocketRequest();
-  const { isDisconnect, socket } = useSocket();
-  const { addAlert, linkController, addLink, removeLink } = useController();
-
-  useEffect(() => {
-    receiverEvent("logoutEventReceiver", (data) => {
-      stopLoading();
-
-      if (!data.success) {
-        addAlert(data.message, "error");
-        return;
-      }
-
-      setUser(null);
-    });
-  }, []);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const startTime = Date.now();
-
-  //     sendEvent("ping", {});
-
-  //     socket.once("pong", () => {
-  //       const endTime = Date.now();
-  //       const calculatedPing = endTime - startTime;
-  //       setPing(calculatedPing);
-  //     });
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-
-  useEffect(() => {
-    removeLink("panel_setting");
-    removeLink("support");
-    removeLink("management_of_user");
-    removeLink("course");
-    removeLink("send_message");
-
-    switch (pathname) {
-      case "/dashboard/panel_setting/sms_system":
-        // removeLink("panel_setting");
-        return addLink("تنظیمات پیامکی", "panel_setting");
-
-      case "/dashboard/panel_setting/general_settings":
-        // removeLink("panel_setting");
-        return addLink("تنظیمات اطلاعات عمومی", "panel_setting");
-
-      case "/dashboard/support/ai_support":
-        return addLink("پشتیبانی هوش مصنوعی", "support");
-
-      case "/dashboard/support/manual_support":
-        return addLink("پشتیبانی دستی", "support");
-
-      case "/dashboard/management_users/send_message":
-        return addLink("ارسال پیام", "send_message");
-    }
-  }, [pathname]);
-
-  // useEffect(() => {
-  //   if (isDisconnect || secondsLeft <= 0) {
-  //     return;
-  //   }
-
-  //   const timer = setInterval(() => {
-  //     setSecondsLeft((prev) => prev - 1);
-  //   }, 1000);
-
-  //   return () => clearInterval(timer);
-  // }, [secondsLeft, isDisconnect]);
-
-  useEffect(() => {
-    sendEvent("startTimer", {});
-
-    receiverEvent("timer", (data) => {
-      setSecondsLeft(data.remainingTime);
-    });
-  }, []);
-
   const buttons: {
     hover_icon: ReactNode;
     out_icon: ReactNode;
@@ -479,6 +392,94 @@ export default function MainLayout({
       text: "همکاری در فروش",
     },
   ];
+
+  const pathname = usePathname(); // Get the current path
+  const [hover, setHover] = useState<number>(-1);
+  const [ping, setPing] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState("30");
+
+  const { user, setUser } = useAuth();
+  const { isLoading, startLoading, stopLoading } = useLoading();
+  const { sendEvent, receiverEvent } = useSocketRequest();
+  const { isDisconnect, socket } = useSocket();
+  const { addAlert, linkController, addLink, removeLink } = useController();
+  const router = useRouter();
+
+  useEffect(() => {
+    receiverEvent("logoutEventReceiver", (data) => {
+      stopLoading();
+
+      if (!data.success) {
+        addAlert(data.message, "error");
+        return;
+      }
+
+      setUser(null);
+    });
+  }, []);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const startTime = Date.now();
+
+  //     sendEvent("ping", {});
+
+  //     socket.once("pong", () => {
+  //       const endTime = Date.now();
+  //       const calculatedPing = endTime - startTime;
+  //       setPing(calculatedPing);
+  //     });
+  //   }, 1000);
+
+  //   return () => clearInterval(interval);
+  // }, []);
+
+  useEffect(() => {
+    removeLink("panel_setting");
+    removeLink("support");
+    removeLink("management_of_user");
+    removeLink("course");
+    removeLink("send_message");
+
+    switch (pathname) {
+      case "/dashboard/panel_setting/sms_system":
+        // removeLink("panel_setting");
+        return addLink("تنظیمات پیامکی", "panel_setting");
+
+      case "/dashboard/panel_setting/general_settings":
+        // removeLink("panel_setting");
+        return addLink("تنظیمات اطلاعات عمومی", "panel_setting");
+
+      case "/dashboard/support/ai_support":
+        return addLink("پشتیبانی هوش مصنوعی", "support");
+
+      case "/dashboard/support/manual_support":
+        return addLink("پشتیبانی دستی", "support");
+
+      case "/dashboard/management_users/send_message":
+        return addLink("ارسال پیام", "send_message");
+    }
+  }, [pathname]);
+
+  // useEffect(() => {
+  //   if (isDisconnect || secondsLeft <= 0) {
+  //     return;
+  //   }
+
+  //   const timer = setInterval(() => {
+  //     setSecondsLeft((prev) => prev - 1);
+  //   }, 1000);
+
+  //   return () => clearInterval(timer);
+  // }, [secondsLeft, isDisconnect]);
+
+  useEffect(() => {
+    sendEvent("startTimer", {});
+
+    receiverEvent("timer", (data) => {
+      setSecondsLeft(data.remainingTime);
+    });
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (!user) return;

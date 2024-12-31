@@ -5,31 +5,37 @@ import { useAuth } from "@/contexts/authContext";
 import { useController } from "@/contexts/controllerContext";
 import useLoading from "@/hooks/useLoading";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 function InnerComponent() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
   const router = useRouter();
   const { addAlert } = useController();
-  const { stopLoading } = useLoading();
+  const { isLoading, stopLoading } = useLoading();
   const { user, loadingAuth } = useAuth();
 
+  const [status, setStatus] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!code) return;
+    setStatus(code);
+  }, [code]);
 
-    stopLoading();
+  useEffect(() => {
+    if (!status) return;
 
-    if (code === "200") {
+    isLoading && stopLoading();
+
+    if (status === "200") {
       addAlert("به SpotSeller خوش آمدید");
 
       router.replace("/dashboard");
-    } else if (code === "201") {
+    } else if (status === "201") {
       addAlert("اکانت شما با موفقیت ساخته شد");
 
       router.replace("/dashboard");
     }
-  }, [code, addAlert, router]);
+  }, [status]);
 
   useEffect(() => {
     if (!loadingAuth && !user) router.push("/");

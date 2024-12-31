@@ -144,7 +144,11 @@ export default function Dashboard() {
       height: 31.16,
     },
     {
-      header: isLoadingBots ? "connect..." : bot?.setting.status ? "On" : "Off",
+      header: isLoadingBots
+        ? "connect..."
+        : bot?.settings.status
+        ? "On"
+        : "Off",
       description: "وضعیت اتصال ربات",
       backColor: "bg-[#EE8800]",
       iconBackColor: "bg-[#BE6D05]",

@@ -1,7 +1,7 @@
 export type BotType = {
   token: string;
   botId: string;
-  setting: {
+  settings: {
     status: boolean;
   };
 };

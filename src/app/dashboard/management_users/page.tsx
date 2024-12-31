@@ -170,7 +170,7 @@ export default function ManagementUsers() {
         </div>
       );
 
-    if (userClick && !openDialog && userPurchase?.length === 0)
+    if (userClick && !openDialog && userPurchase?.length > 0)
       return (
         <EditUserInfo
           userClick={userClick}
@@ -179,7 +179,7 @@ export default function ManagementUsers() {
         />
       );
 
-    if (!openDialog && userPurchase?.length !== 0)
+    if (!openDialog && userPurchase?.length > 0)
       return (
         <ViewCustomerPurchaseHistory
           purchase={userPurchase}
@@ -188,7 +188,7 @@ export default function ManagementUsers() {
         />
       );
 
-    if (registeredUsers?.length !== 0) {
+    if (registeredUsers?.length > 0) {
       return (
         <div>
           <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>

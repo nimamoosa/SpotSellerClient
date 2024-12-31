@@ -146,7 +146,7 @@ export default function Home() {
       name,
       auth_filed: auth,
       spot_player_key,
-      setting: {
+      settings: {
         status: false,
       },
     });

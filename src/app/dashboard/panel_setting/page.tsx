@@ -91,13 +91,13 @@ export default function RobotSettings() {
       fields_update: [
         {
           field: "settings",
-          data: { status: !bot.setting.status },
+          data: { status: !bot.settings.status },
         },
       ],
       userId: user.userId,
       botId: user.botId,
       token: bot.token,
-      object: { status: !bot.setting.status },
+      object: { status: !bot.settings.status },
     });
   }, [user, bot, isLoading]);
 
@@ -149,7 +149,7 @@ export default function RobotSettings() {
               loading={!bot && isLoading}
               disabled={isLoading || !payment}
               onClick={handleChangeBotStatus}
-              active={bot.setting.status}
+              active={bot.settings.status}
               active_text="روشن"
               inactive_text="خاموش"
               inactive_class="text-[13px]"

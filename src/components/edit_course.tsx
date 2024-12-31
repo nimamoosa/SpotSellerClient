@@ -25,6 +25,7 @@ import { useFile } from "@/contexts/fileContext";
 import { useController } from "@/contexts/controllerContext";
 import { Skeleton } from "./ui/skeleton";
 import { Events, ReceiverEvents } from "@/enum/event";
+import Compressor from "compressorjs";
 
 export default function EditCourse({
   course,
@@ -61,7 +62,7 @@ export default function EditCourse({
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { addArrayCourse, courses } = useCourse();
   const { user } = useAuth();
-  const { fileUrls, removeFile, addFile } = useFile();
+  const { fileUrls, removeFile } = useFile();
   const { addAlert } = useController();
 
   useEffect(() => {
@@ -210,7 +211,7 @@ export default function EditCourse({
     }
   };
 
-  const uploadFile = (
+  const uploadFile = async (
     file: File | null | undefined,
     name: string | undefined,
     userId: number | undefined,
@@ -218,21 +219,62 @@ export default function EditCourse({
   ) => {
     if (!file) return;
 
-    const chunkSize = 32 * 1024; // 1 MB per chunk (adjust as necessary)
+    const chunkSize = 32 * 1024; // 32KB per chunk
     const totalChunks = Math.ceil(file.size / chunkSize);
-
     let chunkIndex = 0;
 
-    // Read and send file chunks sequentially
-    const sendChunk = () => {
-      const reader = new FileReader();
-      const start = chunkIndex * chunkSize;
-      const end = Math.min(start + chunkSize, file.size);
+    const compressFile = (
+      file: File,
+      maxSizeInMB: number = 1,
+      quality: number = 0.5
+    ): Promise<File> => {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          reject(new Error("No file provided for compression."));
+          return;
+        }
 
-      const chunk = file.slice(start, end);
+        // Check if the file is already under the size limit
+        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+        if (file.size <= maxSizeInBytes) {
+          resolve(file);
+          return;
+        }
 
-      // Return a promise that resolves once the chunk is sent
+        new Compressor(file, {
+          quality, // Initial quality setting
+          maxWidth: 1920, // Set max width for resizing (optional)
+          maxHeight: 1080, // Set max height for resizing (optional)
+          convertSize: maxSizeInBytes, // Automatically compress if larger than max size
+          mimeType: "image/webp", // Convert to WebP format using mimeType
+          success(compressedFile) {
+            // Verify compressed file size
+            if (compressedFile.size <= maxSizeInBytes) {
+              resolve(compressedFile as File);
+            } else {
+              // Further compress if needed
+              reject(
+                new Error(
+                  "File could not be compressed under the desired size."
+                )
+              );
+            }
+          },
+          error(err) {
+            reject(err);
+          },
+        });
+      });
+    };
+
+    const sendChunk = (file: File) => {
       return new Promise<void>((resolve, reject) => {
+        const reader = new FileReader();
+        const start = chunkIndex * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+
+        const chunk = file.slice(start, end);
+
         reader.onloadend = () => {
           const data = {
             chunk: reader.result,
@@ -241,41 +283,44 @@ export default function EditCourse({
             filename: file.name,
             userId,
             botId,
-            type: "profile",
+            type: "images",
             name,
-            another_data: values,
             token: authorizationToken,
           };
 
-          // Send the chunk to the server via Socket.IO
           sendEvent(Events.UPLOAD_FILE, data);
 
-          // If there are more chunks, resolve to send the next one
           if (chunkIndex + 1 < totalChunks) {
             chunkIndex++;
-            resolve(); // Continue to the next chunk
+            resolve();
           } else {
-            // setUploadMessage("File upload complete!");
-            resolve(); // End the process when the last chunk is sent
+            resolve();
           }
         };
 
-        reader.onerror = (error) => reject(error); // Handle reading errors
+        reader.onerror = (error) => {
+          console.error("Upload error:", error);
+          reject(error);
+        };
 
-        // Read the current chunk as a data URL (Base64)
         reader.readAsDataURL(chunk);
       });
     };
 
-    // Function to start uploading chunks sequentially
-    const uploadChunksSequentially = async () => {
-      for (let i = chunkIndex; i < totalChunks; i++) {
-        await sendChunk(); // Wait for each chunk to finish before sending the next
+    const uploadChunksSequentially = async (compressedFile: File) => {
+      try {
+        for (let i = chunkIndex; i < totalChunks; i++) {
+          await sendChunk(compressedFile);
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
       }
     };
 
-    // setUploading(true);
-    uploadChunksSequentially(); // Start sending the file chunks sequentially
+    // Compress and upload
+    await compressFile(file).then((compressedFile) => {
+      uploadChunksSequentially(compressedFile);
+    });
   };
 
   const noChangeCourse = () => {

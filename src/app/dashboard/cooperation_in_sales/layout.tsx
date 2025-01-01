@@ -30,9 +30,14 @@ export default function Layout({
       segment: "public_setting",
     },
     {
+      label: "دوره های فعال",
+      href: "/dashboard/cooperation_in_sales/active_course",
+      segment: "active_course",
+    },
+    {
       label: "پرداختی ها",
       href: "/dashboard/cooperation_in_sales/sales",
-      segment: "sms_system",
+      segment: "sales",
     },
   ];
 
@@ -91,7 +96,7 @@ export default function Layout({
           </div>
         </div>
       ) : (
-        <div className="mt-10 w-[99%] ml-auto mr-auto">{children}</div>
+        <div className="mt-5 w-[99%] ml-auto mr-auto">{children}</div>
       )}
     </div>
   );

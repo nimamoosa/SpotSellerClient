@@ -156,7 +156,7 @@ export default function Home() {
     <main className="flex w-full h-full items-center justify-center">
       <div className="w-[35%] h-[90vh] rounded-2xl bg-white">
         <div className="h-[13vh] border-b-2 flex items-center justify-end w-full">
-          <img src="/logo.svg" alt="" className="w-[45%] ml-7" />
+          <img src="/logo.png" alt="" className="w-[45%] ml-7" />
         </div>
 
         <div className="h-[75vh] flex items-center justify-center">

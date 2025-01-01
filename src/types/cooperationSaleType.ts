@@ -1,7 +1,6 @@
 export type AvailableUsersType = {
   userId: Number;
   name: String;
-  required: true;
 };
 
 export type AvailableCourses = {
@@ -13,11 +12,21 @@ export type AvailableCourses = {
   }[];
 };
 
+export type CooperationSalesSetting = {
+  status: boolean;
+};
+
+export type CooperationSales = {
+  paymentId: string;
+  userId: number;
+  courseId: string;
+  amount: number;
+  status: "success" | "cancel";
+};
+
 export type CooperationSalesType = {
-  type: "for_all_user" | "for_user";
   available_users: AvailableUsersType[];
   available_courses: AvailableCourses[];
-  settings: {
-    status: boolean;
-  };
+  sales: CooperationSales[];
+  settings: CooperationSalesSetting;
 };

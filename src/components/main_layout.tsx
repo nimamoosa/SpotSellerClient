@@ -12,6 +12,7 @@ import { usePathname, useRouter } from "next/navigation"; // Import usePathname
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 import { ScrollArea } from "./ui/scroll-area";
+import Image from "next/image";
 
 export default function MainLayout({
   children,
@@ -375,16 +376,16 @@ export default function MainLayout({
       href: "/dashboard/connect_to_wordpress",
       text: "اتصال به وردپرس",
     },
-    {
-      hover_icon: (
-        <>
-          <Webhook />
-        </>
-      ),
-      out_icon: <></>,
-      href: "/dashboard/create_site",
-      text: "ساخت سایت",
-    },
+    // {
+    //   hover_icon: (
+    //     <>
+    //       <Webhook />
+    //     </>
+    //   ),
+    //   out_icon: <></>,
+    //   href: "/dashboard/create_site",
+    //   text: "ساخت سایت",
+    // },
     {
       hover_icon: <></>,
       out_icon: <></>,
@@ -494,10 +495,13 @@ export default function MainLayout({
         <aside className="w-full">
           <div className="flex justify-end mt-5">
             <div className="flex items-center justify-center w-full object-cover">
-              <img
-                src="/logo.svg"
-                className="w-[300px] rounded-full"
+              <Image
+                src="/logo.png"
+                className="rounded-full"
                 alt="icon"
+                width={314}
+                height={70}
+                loading="lazy"
               />
             </div>
           </div>

@@ -3,23 +3,18 @@
 import ToggleButton from "@/components/toggel_button";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { Slider } from "@/components/ui/slider";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Toggle } from "@/components/ui/toggle";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useAuth } from "@/contexts/authContext";
 import { useController } from "@/contexts/controllerContext";
 import { useCooperationSales } from "@/contexts/cooperationSaleContext";
@@ -27,8 +22,9 @@ import { useCourse } from "@/contexts/courseContext";
 import { useRegisteredUsers } from "@/contexts/registeredUsersContext";
 import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
-import { AvailableCourses } from "@/types/cooperationSaleType";
-import { PopoverTrigger } from "@radix-ui/react-popover";
+import { cn } from "@/lib/utils";
+import { AvailableUsersType } from "@/types/cooperationSaleType";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function CooperationInSales() {
@@ -44,9 +40,8 @@ export default function CooperationInSales() {
   const { courses } = useCourse();
   const { registeredUsers } = useRegisteredUsers();
 
-  const [availableCourses, setAvailableCourses] = useState<AvailableCourses[]>(
-    []
-  );
+  const [open, setOpen] = useState(false);
+  const [availableUser, setAvailableUser] = useState<AvailableUsersType[]>([]);
 
   useEffect(() => {
     receiverEvent("createCooperationInSalesEventReceiver", (data) => {
@@ -62,7 +57,7 @@ export default function CooperationInSales() {
     receiverEvent("updateCooperationFiledEventReceiver", (data) => {
       stopLoading();
 
-      if (!data.success) return;
+      if (!data) return addAlert(data.message, "error");
 
       setCooperationSalesClient(data.update);
     });
@@ -71,7 +66,7 @@ export default function CooperationInSales() {
   useEffect(() => {
     if (!cooperationSalesClient) return;
 
-    setAvailableCourses(cooperationSalesClient.available_courses);
+    setAvailableUser(cooperationSalesClient.available_users);
   }, [cooperationSalesClient]);
 
   const handleToggleButtonClick = () => {
@@ -116,50 +111,39 @@ export default function CooperationInSales() {
     });
   };
 
-  const handleUpdateCourseStatus = (deleted: boolean, courseId: string) => {
+  const saveUsers = () => {
     startLoading();
 
-    sendEvent("updateCooperationFiled", {
+    const data = {};
+
+    Object.assign(data, {
       userId: user?.userId,
       botId: user?.botId,
       update_filed: [
         {
-          method: deleted ? "course_delete" : "course_add", // course_delete or course_add
+          method: "update_all_user",
           field: {
-            courseId,
+            available_users: availableUser,
           },
         },
       ],
     });
-  };
 
-  const handleClickSave = () => {
-    startLoading();
-
-    sendEvent("updateCooperationFiled", {
-      userId: user?.userId,
-      botId: user?.botId,
-      update_filed: [
-        {
-          method: "update_all_courses", // course_delete or course_add
-          field: {
-            available_courses: availableCourses,
-          },
-        },
-      ],
-    });
+    sendEvent("updateCooperationFiled", data);
   };
 
   const isDisabled = () => {
-    if (!cooperationSalesClient || isLoading) return true;
+    if (!cooperationSalesClient || isLoading || !registeredUsers) return true;
 
-    const areSharesEqual = availableCourses.every((course) => {
-      const matchingCourse = cooperationSalesClient?.available_courses.find(
-        (clientCourse) => clientCourse.courseId === course.courseId
+    if (availableUser.length <= 0) return true;
+
+    const areSharesEqual =
+      availableUser.length === cooperationSalesClient.available_users.length &&
+      availableUser.every((user) =>
+        cooperationSalesClient.available_users.some(
+          (clientUser) => clientUser.userId === user.userId
+        )
       );
-
-      return matchingCourse?.share === course.share;
-    });
 
     return areSharesEqual;
   };
@@ -176,147 +160,97 @@ export default function CooperationInSales() {
           disabled={isLoadingCooperationSalesClient || isLoading}
           onClick={handleToggleButtonClick}
         />
-
-        <Toggle
-          pressed={cooperationSalesClient?.type === "for_all_user" || false}
-          className="rounded-xl"
-          disabled={cooperationSalesClient === null || isLoading}
-        >
-          {cooperationSalesClient?.type === "for_all_user"
-            ? "برای همه ی کاربران"
-            : "برای کاربر خاص"}
-        </Toggle>
       </header>
 
       <main className="mt-6 overflow-auto h-full">
-        <div className="border border-[#D6D6D6] rounded-xl overflow-hidden">
-          <Table className="w-full border-collapse">
-            <TableHeader className="w-full">
-              <TableRow className="font-medium text-[16px] bg-[#F6F6F6] border-b border-gray-300">
-                <TableHead className="w-[70%] border-l-[1px] p-4 border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
-                  <p className="mr-3 w-fit">عنوان دوره</p>
-                </TableHead>
-                <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
-                  <p>عملیات</p>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {availableCourses && courses ? (
-                courses.map((item, index) => {
-                  return (
-                    <TableRow className="hover:bg-transparent" key={index}>
-                      <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
-                        <p className="mr-5">{item.title}</p>
-                      </TableCell>
-                      <TableCell className="flex justify-evenly items-center">
-                        <div className="-ml-2">
-                          <Button
-                            className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
-                            disabled={isLoading || !cooperationSalesClient}
-                            onClick={() =>
-                              handleUpdateCourseStatus(
-                                availableCourses.some(
-                                  (cooperation) =>
-                                    cooperation.courseId === item._id
-                                ),
-                                item._id
+        <section className="flex flex-col justify-center gap-5">
+          <div>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-[400px] h-[5.5vh] justify-between"
+                >
+                  {availableUser.length === registeredUsers.length
+                    ? "همه ی کاربران"
+                    : "کاربران خاص"}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-[400px] p-0" dir="ltr">
+                <Command>
+                  <CommandInput placeholder="userId را وارد کنید" />
+                  <CommandList>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+
+                    <CommandGroup>
+                      {availableUser.length !== registeredUsers.length ? (
+                        <CommandItem
+                          className="cursor-pointer"
+                          key={"for_all_user"}
+                          value={"for_all_user"}
+                          onSelect={() => {
+                            setAvailableUser(registeredUsers);
+                          }}
+                        >
+                          برای همه ی کاربران
+                        </CommandItem>
+                      ) : (
+                        <></>
+                      )}
+
+                      {registeredUsers.map((user) => (
+                        <CommandItem
+                          className="cursor-pointer"
+                          key={user.userId.toString()}
+                          value={user.userId.toString()}
+                          onSelect={(currentValue) => {
+                            setAvailableUser((prev) =>
+                              prev.some(
+                                (item) => item.userId === Number(currentValue)
                               )
-                            }
-                          >
-                            {availableCourses.find(
-                              (cooperation) => cooperation.courseId === item._id
-                            )
-                              ? "غیر فعال"
-                              : "فعال"}
-                          </Button>
-                        </div>
+                                ? prev.filter(
+                                    (item) =>
+                                      item.userId !== Number(currentValue)
+                                  )
+                                : [...prev, { ...user }]
+                            );
+                          }}
+                        >
+                          {user.name} - {user.userId.toString()}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              availableUser.some(
+                                (item) => item.userId === user.userId
+                              )
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-                        <div className="-ml-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
-                                disabled={isLoading || !cooperationSalesClient}
-                              >
-                                درصد سهم
-                              </Button>
-                            </PopoverTrigger>
-
-                            <PopoverContent className="w-[150px]">
-                              <div>
-                                <Slider
-                                  defaultValue={[
-                                    availableCourses.find(
-                                      (cooperation) =>
-                                        cooperation.courseId === item._id
-                                    )?.share || 0,
-                                  ]}
-                                  max={100}
-                                  step={1}
-                                  value={[
-                                    availableCourses.find(
-                                      (cooperation) =>
-                                        cooperation.courseId === item._id
-                                    )?.share || 0,
-                                  ]}
-                                  onValueChange={(val) => {
-                                    setAvailableCourses((prev) => {
-                                      if (!prev) return [];
-
-                                      const updatedCourses = prev.map(
-                                        (course) => {
-                                          if (course.courseId === item._id) {
-                                            return {
-                                              ...course,
-                                              share: val[0] || 0,
-                                            };
-                                          }
-                                          return course;
-                                        }
-                                      );
-
-                                      return updatedCourses;
-                                    });
-                                  }}
-                                />
-                              </div>
-
-                              <DropdownMenuSeparator />
-
-                              <div className="flex items-center justify-center mt-5">
-                                <p>
-                                  %{" "}
-                                  {availableCourses.find(
-                                    (cooperation) =>
-                                      cooperation.courseId === item._id
-                                  )?.share || 0}{" "}
-                                </p>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <></>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div className="mt-10">
-          <Button
-            variant={"ghost"}
-            className="border-2 rounded-lg h-[6vh]"
-            disabled={isDisabled()}
-            onClick={handleClickSave}
-          >
-            ذخیره تغییرات
-          </Button>
-        </div>
+          <div>
+            <Button
+              variant={"ghost"}
+              className="border-2 h-[5vh] w-[9%]"
+              disabled={isDisabled()}
+              onClick={saveUsers}
+            >
+              ذخیره
+            </Button>
+          </div>
+        </section>
       </main>
     </div>
   );

@@ -68,6 +68,10 @@ export default function RootLayout({
       <body
         className={`min-h-full flex items-center font-sans justify-center overflow-hidden bg-[#CEBEE4] text-black`}
       >
+        <head>
+          <link rel="preload" href="/logo.png" as="image" />
+        </head>
+
         <SocketProvider>
           <AuthProvider>
             <CourseProvider>

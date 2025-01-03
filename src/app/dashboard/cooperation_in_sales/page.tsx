@@ -54,12 +54,18 @@ export default function CooperationInSales() {
   }, []);
 
   useEffect(() => {
-    receiverEvent("updateCooperationFiledEventReceiver", (data) => {
+    receiverEvent("updateCooperationFieldEventReceiver", (data) => {
       stopLoading();
 
       if (!data) return addAlert(data.message, "error");
 
-      setCooperationSalesClient(data.update);
+      if (data.result.successful[0].method === "update_all_users") {
+        addAlert("کاربران با موفقیت ذخیره شده اند", "success");
+      } else {
+        addAlert("تغییرات با موفقیت ذخیره شد", "success");
+      }
+
+      setCooperationSalesClient(data.result.successful[0].update);
     });
   }, []);
 
@@ -97,10 +103,10 @@ export default function CooperationInSales() {
       return;
     }
 
-    sendEvent("updateCooperationFiled", {
+    sendEvent("updateCooperationField", {
       userId: user?.userId,
       botId: user?.botId,
-      update_filed: [
+      update_fields: [
         {
           method: "change_status",
           field: {
@@ -119,9 +125,9 @@ export default function CooperationInSales() {
     Object.assign(data, {
       userId: user?.userId,
       botId: user?.botId,
-      update_filed: [
+      update_fields: [
         {
-          method: "update_all_user",
+          method: "update_all_users",
           field: {
             available_users: availableUser,
           },
@@ -129,7 +135,7 @@ export default function CooperationInSales() {
       ],
     });
 
-    sendEvent("updateCooperationFiled", data);
+    sendEvent("updateCooperationField", data);
   };
 
   const isDisabled = () => {

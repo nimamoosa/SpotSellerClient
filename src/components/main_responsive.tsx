@@ -22,9 +22,8 @@ export default function MainResponsive({ children }: { children: ReactNode }) {
   const [isClient, setIsClient] = useState(false);
 
   const { loadingAuth } = useAuth();
-  const { isDisconnect } = useSocket();
   const pathname = usePathname();
-  const router = useRouter();
+  const { addAlert, removeAlert, alerts } = useController();
 
   useEffect(() => {
     setIsClient(true);

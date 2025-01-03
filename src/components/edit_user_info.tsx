@@ -20,11 +20,11 @@ import { LoadingButton } from "./ui/loading-button";
 export default function EditUserInfo({
   userClick,
   setUserClick,
-  setIsEdit,
+  onClose,
 }: {
   userClick: RegisteredUsersType | null;
   setUserClick: Dispatch<SetStateAction<RegisteredUsersType | null>>;
-  setIsEdit: Dispatch<SetStateAction<boolean>>;
+  onClose: () => void;
 }) {
   const [values, setValues] = useState<{ phone_number: string; name: string }>({
     phone_number: "",
@@ -72,7 +72,7 @@ export default function EditUserInfo({
         <Button
           className="rounded-lg"
           onClick={() => {
-            setIsEdit(false);
+            onClose();
             setUserClick(null);
           }}
         >

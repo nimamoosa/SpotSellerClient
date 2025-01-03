@@ -14,6 +14,7 @@ import {
 } from "react";
 import { useSocket } from "./socketContext";
 import { Events, ReceiverEvents } from "@/enum/event";
+import { useController } from "./controllerContext";
 
 interface AuthContextProps {
   user: AuthType | null;
@@ -34,9 +35,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const { startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { clientId, isReconnect, setIsReconnect, socket } = useSocket();
+  const { addAlert, removeAlert, alerts } = useController();
 
   useEffect(() => {
     startLoading();
+
+    addAlert("کمی صبر کنید....", "success", Infinity, true);
 
     const getSession = async () => {
       const response = await fetch("/api/auth");
@@ -56,15 +60,22 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     receiverEvent(ReceiverEvents.GET_AUTH, (data) => {
+      stopLoading();
+      setLoadingAuth(false);
+
       if (data.success == false) {
-        setLoadingAuth(false);
         setUser(null);
       } else {
-        setLoadingAuth(false);
         setUser(data.data);
       }
     });
-  }, [stopLoading]);
+  }, []);
+
+  useEffect(() => {
+    if (!loadingAuth) {
+      removeAlert(alerts[0].id);
+    }
+  }, [loadingAuth]);
 
   useEffect(() => {
     if (!user) return;

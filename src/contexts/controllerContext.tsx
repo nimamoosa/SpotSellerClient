@@ -17,12 +17,21 @@ interface AlertState {
   text: string;
   type?: AlertType;
   timeout: number; // Time before auto-removal in milliseconds
+  loading?: boolean;
 }
+
+const generateUniqueId = () =>
+  `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 
 type AlertAction =
   | {
       type: "ADD_ALERT";
-      payload: { text: string; type?: AlertType; timeout?: number };
+      payload: {
+        text: string;
+        type?: AlertType;
+        timeout?: number;
+        loading?: boolean;
+      };
     }
   | { type: "REMOVE_ALERT"; payload: { id: string } }
   | { type: "CLEAR_ALERTS" };
@@ -33,7 +42,7 @@ function alertReducer(state: AlertState[], action: AlertAction): AlertState[] {
       return [
         ...state,
         {
-          id: new Date().getSeconds().toString(),
+          id: generateUniqueId(),
           timeout: action.payload.timeout ?? 3000,
           ...action.payload,
         },
@@ -53,7 +62,12 @@ interface ControllerContextProp {
   code: string;
   setCode: Dispatch<React.SetStateAction<string>>;
   alerts: AlertState[];
-  addAlert: (text: string, type?: AlertType, timeout?: number) => void;
+  addAlert: (
+    text: string,
+    type?: AlertType,
+    timeout?: number,
+    loading?: boolean
+  ) => void;
   removeAlert: (id: string) => void;
   clearAlerts: () => void;
   isLoading: boolean;
@@ -122,9 +136,17 @@ export default function ControllerProvider({
 
   const [alerts, dispatchAlerts] = useReducer(alertReducer, []);
 
-  const addAlert = (text: string, type?: AlertType, timeout = 3000) => {
+  const addAlert = (
+    text: string,
+    type?: AlertType,
+    timeout = 3000,
+    loading = false
+  ) => {
     const id = Date.now().toString();
-    dispatchAlerts({ type: "ADD_ALERT", payload: { text, type, timeout } });
+    dispatchAlerts({
+      type: "ADD_ALERT",
+      payload: { text, type, timeout, loading },
+    });
 
     // Auto-remove alert after the specified timeout
     setTimeout(() => {

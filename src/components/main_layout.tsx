@@ -441,14 +441,13 @@ export default function MainLayout({
     removeLink("management_of_user");
     removeLink("course");
     removeLink("send_message");
+    removeLink("cooperation");
 
     switch (pathname) {
       case "/dashboard/panel_setting/sms_system":
-        // removeLink("panel_setting");
         return addLink("تنظیمات پیامکی", "panel_setting");
 
       case "/dashboard/panel_setting/general_settings":
-        // removeLink("panel_setting");
         return addLink("تنظیمات اطلاعات عمومی", "panel_setting");
 
       case "/dashboard/support/ai_support":
@@ -459,6 +458,9 @@ export default function MainLayout({
 
       case "/dashboard/management_users/send_message":
         return addLink("ارسال پیام", "send_message");
+
+      case "/dashboard/cooperation_in_sales/active_course":
+        return addLink("دوره های فعال", "cooperation");
     }
   }, [pathname]);
 
@@ -630,7 +632,7 @@ export default function MainLayout({
                           : ""
                       }`,
                     }}
-                    onClick={() => setHover(index)}
+                    // onClick={() => setHover(index)}
                     onMouseOut={() => setHover(-1)}
                     onMouseOver={() => setHover(index)}
                   />

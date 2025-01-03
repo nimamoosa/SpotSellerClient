@@ -39,8 +39,7 @@ export default function ManagementUsers() {
   const [userClick, setUserClick] = useState<RegisteredUsersType | null>(null);
   const [userPurchase, setUserPurchase] = useState<TransactionUsersType[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [isRemove, setIsRemove] = useState(false);
+  const [routeType, setRouteType] = useState<string>("");
 
   const { registeredUsers, setRegisteredUsers, isLoadingRegisteredUsers } =
     useRegisteredUsers();
@@ -51,14 +50,14 @@ export default function ManagementUsers() {
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   useEffect(() => {
-    if (userClick && isEdit)
+    if (routeType === "edit_user_info")
       return addLink("ویرایش کاربر", "management_of_user");
 
-    if (userPurchase.length !== 0)
+    if (routeType === "purchase_history")
       return addLink("گزارشات", "management_of_user");
 
     removeLink("management_of_user");
-  }, [userClick, userPurchase, isEdit]);
+  }, [routeType]);
 
   useEffect(() => {
     receiverEvent("updateBanStatusEventReceiver", (data) => {
@@ -78,15 +77,9 @@ export default function ManagementUsers() {
   }, []);
 
   useEffect(() => {
-    if (
-      !transactions ||
-      isLoadingTransactions ||
-      !userClick ||
-      isEdit ||
-      openDialog ||
-      isRemove
-    )
+    if (!transactions || isLoadingTransactions || !userClick || openDialog)
       return;
+    if (routeType !== "purchase_history") return;
 
     const newUpdate = transactions
       .filter((item) =>
@@ -111,15 +104,13 @@ export default function ManagementUsers() {
     userPurchase,
     isLoadingTransactions,
     userClick,
-    isEdit,
     openDialog,
-    isRemove,
+    routeType,
   ]);
 
   useEffect(() => {
     if (!userClick || !transactions.length) return;
-    if (isEdit) return;
-    if (isRemove) return;
+    if (routeType !== "purchase_history") return;
 
     const relatedTransactions = transactions.filter((transaction) =>
       transaction.users.some((user) => user.userId === userClick.userId)
@@ -132,7 +123,7 @@ export default function ManagementUsers() {
     if (relatedUsers.length !== userPurchase.length) {
       setUserPurchase(relatedUsers);
     }
-  }, [transactions, userClick, isEdit, isRemove]);
+  }, [transactions, userClick, routeType]);
 
   const handleBanedUser = useCallback(
     (userId: number, status: boolean) => {
@@ -157,7 +148,9 @@ export default function ManagementUsers() {
 
     const fix = tran.flat().flatMap((i) => i.users);
 
-    if (fix.length < 0) return addAlert("این کاربر تراکنشی ندارد", "warning");
+    if (fix.length <= 0) return addAlert("این کاربر تراکنشی ندارد", "info");
+
+    setRouteType("purchase_history");
 
     setUserPurchase(fix);
   };
@@ -170,21 +163,22 @@ export default function ManagementUsers() {
         </div>
       );
 
-    if (userClick && !openDialog && userPurchase?.length > 0)
+    if (routeType === "edit_user_info" && userClick)
       return (
         <EditUserInfo
           userClick={userClick}
           setUserClick={setUserClick}
-          setIsEdit={setIsEdit}
+          onClose={() => setRouteType("")}
         />
       );
 
-    if (!openDialog && userPurchase?.length > 0)
+    if (routeType === "purchase_history" && userPurchase?.length > 0)
       return (
         <ViewCustomerPurchaseHistory
           purchase={userPurchase}
           setUserPurchase={setUserPurchase}
           setUserClick={setUserClick}
+          onClose={() => setRouteType("")}
         />
       );
 
@@ -265,7 +259,7 @@ export default function ManagementUsers() {
                         type="button"
                         disabled={isLoading}
                         onClick={() => {
-                          setIsEdit(true);
+                          setRouteType("edit_user_info");
                           setUserClick(item);
                         }}
                       >
@@ -295,7 +289,7 @@ export default function ManagementUsers() {
                         onClick={() => {
                           setUserClick(item);
                           setOpenDialog(true);
-                          setIsRemove(true);
+                          setRouteType("remove_user");
                         }}
                       >
                         <BsBucket /> حذف کاربر

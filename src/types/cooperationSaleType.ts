@@ -16,17 +16,40 @@ export type CooperationSalesSetting = {
   status: boolean;
 };
 
-export type CooperationSales = {
-  paymentId: string;
-  userId: number;
-  courseId: string;
-  amount: number;
-  status: "success" | "cancel";
-};
-
-export type CooperationSalesType = {
+export type CooperationSalesClientType = {
   available_users: AvailableUsersType[];
   available_courses: AvailableCourses[];
-  sales: CooperationSales[];
   settings: CooperationSalesSetting;
+};
+
+/** ------------------------------ */
+
+export type UserInfoCooperationType = {
+  userId: number;
+  username: string;
+  name: string;
+};
+
+export type SalesCooperationType = "success" | "cancel" | "in_progress";
+
+export type SalesCooperation = {
+  paymentId: string;
+  courseId: string;
+  userId: number;
+  name: string;
+  type: SalesCooperationType;
+  profit_share: number;
+  pay: boolean;
+  time: Date;
+};
+
+export type SalesLinkCooperationType = {
+  courseId: string;
+  user_info: UserInfoCooperationType;
+  link: string;
+  sales: SalesCooperation[];
+};
+
+export type CooperationSales = {
+  sale_links: SalesLinkCooperationType[];
 };

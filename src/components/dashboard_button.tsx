@@ -14,6 +14,15 @@ export default function DashboardButton({
   onMouseOver,
   onMouseOut,
 }: props) {
+  // Prevent default action if disabled
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (disabled) {
+      e.preventDefault(); // Prevent the link from being followed
+    } else {
+      onClick && onClick(); // Call onClick if available and not disabled
+    }
+  };
+
   return (
     <Link
       className={`text-black text-[17px] w-[326px] flex items-center justify-between h-[63.5px] p-5 rounded-full transition-all ease-in-out duration-75 ${
@@ -23,9 +32,6 @@ export default function DashboardButton({
       }`}
       href={href || "#"}
       role="button"
-      onClick={() => {
-        !disabled && onClick ? onClick() : null;
-      }}
       onMouseOver={() => {
         !disabled && onMouseOver ? onMouseOver() : null;
       }}
@@ -33,6 +39,7 @@ export default function DashboardButton({
         !disabled && onMouseOut ? onMouseOut() : null;
       }}
       aria-disabled={disabled}
+      onClick={handleClick} // Handle click event
     >
       <section slot="main" className="flex">
         <div

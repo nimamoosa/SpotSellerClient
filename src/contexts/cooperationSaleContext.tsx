@@ -1,7 +1,10 @@
 "use client";
 
 import { useSocketRequest } from "@/hooks/useSocketRequest";
-import { CooperationSalesType } from "@/types/cooperationSaleType";
+import {
+  CooperationSales,
+  CooperationSalesClientType,
+} from "@/types/cooperationSaleType";
 import {
   createContext,
   Dispatch,
@@ -14,16 +17,20 @@ import {
 import { useAuth } from "./authContext";
 
 interface CooperationSalesContextProps {
-  cooperationSalesClient: CooperationSalesType | null;
+  cooperationSalesClient: CooperationSalesClientType | null;
   setCooperationSalesClient: Dispatch<
-    SetStateAction<CooperationSalesType | null>
+    SetStateAction<CooperationSalesClientType | null>
   >;
+  cooperationSales: CooperationSales | null;
+  setCooperationSales: Dispatch<SetStateAction<CooperationSales | null>>;
   isLoadingCooperationSalesClient: boolean;
 }
 
 const CooperationSalesContext = createContext<CooperationSalesContextProps>({
   cooperationSalesClient: null,
   setCooperationSalesClient: () => {},
+  cooperationSales: null,
+  setCooperationSales: () => {},
   isLoadingCooperationSalesClient: false,
 });
 
@@ -33,7 +40,9 @@ export default function CooperationSalesProvider({
   children: ReactNode;
 }) {
   const [cooperationSalesClient, setCooperationSalesClient] =
-    useState<CooperationSalesType | null>(null);
+    useState<CooperationSalesClientType | null>(null);
+  const [cooperationSales, setCooperationSales] =
+    useState<CooperationSales | null>(null);
   const [isLoadingCooperationSalesClient, setLoadingCooperationSalesClient] =
     useState(false);
 
@@ -47,6 +56,11 @@ export default function CooperationSalesProvider({
       userId: user.userId,
       botId: user.botId,
     });
+
+    sendEvent("getCooperationSales", {
+      userId: user.userId,
+      botId: user.botId,
+    });
   }, [user]);
 
   useEffect(() => {
@@ -57,6 +71,12 @@ export default function CooperationSalesProvider({
 
       setLoadingCooperationSalesClient(false);
     });
+
+    receiverEvent("getCooperationSalesEventReceiver", (data) => {
+      if (!data.success) return;
+
+      setCooperationSales(data.data);
+    });
   }, []);
 
   return (
@@ -64,6 +84,8 @@ export default function CooperationSalesProvider({
       value={{
         cooperationSalesClient,
         setCooperationSalesClient,
+        cooperationSales,
+        setCooperationSales,
         isLoadingCooperationSalesClient,
       }}
     >

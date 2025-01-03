@@ -72,37 +72,37 @@ export default function RootLayout({
           <link rel="preload" href="/logo.png" as="image" />
         </head>
 
-        <SocketProvider>
-          <AuthProvider>
-            <CourseProvider>
-              <BotProvider>
-                <BotVisitProvider>
-                  <RegisteredUsersProvider>
-                    <BotSupportProvider>
-                      <TransactionProvider>
-                        <LicenseProvider>
-                          <PaymentProvider>
-                            <FileProvider>
-                              <CooperationSalesProvider>
-                                <ControllerProvider>
+        <ControllerProvider>
+          <SocketProvider>
+            <AuthProvider>
+              <CourseProvider>
+                <BotProvider>
+                  <BotVisitProvider>
+                    <RegisteredUsersProvider>
+                      <BotSupportProvider>
+                        <TransactionProvider>
+                          <LicenseProvider>
+                            <PaymentProvider>
+                              <FileProvider>
+                                <CooperationSalesProvider>
                                   <MainResponsive>
                                     {children}
                                     <Analytics />
                                     <SpeedInsights />
                                   </MainResponsive>
-                                </ControllerProvider>
-                              </CooperationSalesProvider>
-                            </FileProvider>
-                          </PaymentProvider>
-                        </LicenseProvider>
-                      </TransactionProvider>
-                    </BotSupportProvider>
-                  </RegisteredUsersProvider>
-                </BotVisitProvider>
-              </BotProvider>
-            </CourseProvider>
-          </AuthProvider>
-        </SocketProvider>
+                                </CooperationSalesProvider>
+                              </FileProvider>
+                            </PaymentProvider>
+                          </LicenseProvider>
+                        </TransactionProvider>
+                      </BotSupportProvider>
+                    </RegisteredUsersProvider>
+                  </BotVisitProvider>
+                </BotProvider>
+              </CourseProvider>
+            </AuthProvider>
+          </SocketProvider>
+        </ControllerProvider>
       </body>
     </html>
   );

@@ -42,12 +42,12 @@ export default function ActiveCourse() {
   const { addAlert } = useController();
 
   useEffect(() => {
-    receiverEvent("updateCooperationFiledEventReceiver", (data) => {
+    receiverEvent("updateCooperationFieldEventReceiver", (data) => {
       stopLoading();
 
       if (!data.success) return;
 
-      setCooperationSalesClient(data.update);
+      setCooperationSalesClient(data.result.successful[0].update);
     });
   }, []);
 
@@ -60,10 +60,10 @@ export default function ActiveCourse() {
   const handleUpdateCourseStatus = (deleted: boolean, courseId: string) => {
     startLoading();
 
-    sendEvent("updateCooperationFiled", {
+    sendEvent("updateCooperationField", {
       userId: user?.userId,
       botId: user?.botId,
-      update_filed: [
+      update_fields: [
         {
           method: deleted ? "course_delete" : "course_add", // course_delete or course_add
           field: {
@@ -77,10 +77,10 @@ export default function ActiveCourse() {
   const handleClickSave = () => {
     startLoading();
 
-    sendEvent("updateCooperationFiled", {
+    sendEvent("updateCooperationField", {
       userId: user?.userId,
       botId: user?.botId,
-      update_filed: [
+      update_fields: [
         {
           method: "update_all_courses", // course_delete or course_add
           field: {

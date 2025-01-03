@@ -1,77 +1,79 @@
-"use client";
-
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useController } from "@/contexts/controllerContext";
 
 const Alert: React.FC = () => {
   const { alerts, removeAlert } = useController();
-  const timers = useRef(new Set<number>()); // Use Set to track active timers
 
   useEffect(() => {
+    // Set timeouts to remove alerts after their timeout period
     alerts.forEach((alert) => {
-      if (!timers.current.has(Number(alert.id))) {
-        const timer = setTimeout(() => {
-          removeAlert(alert.id);
-          timers.current.delete(Number(alert.id));
-        }, alert.timeout);
+      if (alert.timeout === Infinity) return;
 
-        timers.current.add(Number(alert.id));
-      }
+      setTimeout(() => {
+        removeAlert(alert.id);
+      }, alert.timeout);
     });
-
-    return () => {
-      timers.current.forEach((id) => {
-        clearTimeout(id);
-      });
-      timers.current.clear();
-    };
   }, [alerts, removeAlert]);
 
   const typeStyles = {
     success:
-      "bg-gradient-to-tr from-purple-900/60 to-purple-800 from-30% backdrop-filter backdrop-blur-xl text-white border-2 border-blue-900",
-    error: "bg-red-900/80 text-white backdrop-filter backdrop-blur-md",
-    info: "bg-blue-800 text-white border-blue-700",
-    warning: "bg-yellow-800 text-white border-yellow-700",
+      "bg-gray-300/50 backdrop-filter backdrop-blur-[8px] shadow-xl border border-black/5",
+    error: "bg-red-500/50 backdrop-filter backdrop-blur-[8.5px] shadow-xl",
+    info: "bg-blue-800/40 backdrop-filter backdrop-blur-[7px] shadow-xl",
+    warning: "bg-yellow-400/50 backdrop-filter backdrop-blur-[8px] shadow-xl",
   };
 
   return (
     <div
       dir="ltr"
-      className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-[350px]"
+      className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center gap-4 w-[90%] max-w-[400px]"
     >
       <AnimatePresence>
-        {alerts.map((alert, index) => (
+        {alerts.map((alert) => (
           <motion.div
             key={alert.id}
-            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            layout // Automatically animates position changes
-            className={`max-w-sm w-full p-4 rounded-2xl border-2 ${
+            exit={{ opacity: 0, y: -30, scale: 0.95 }} // Exit with both x and y
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className={`min-w-[150px] max-w-full max-h-fit min-h-[70px] cursor-pointer p-2 flex items-center justify-between rounded-[22px] ${
               typeStyles[alert.type || "success"]
             }`}
+            drag="y" // Allow dragging in the Y direction
+            dragConstraints={{ top: -100, bottom: 0 }} // Limit drag range
+            dragElastic={0.2} // Make the drag a bit elastic
+            onDragEnd={(event, info) => {
+              // If the alert is dragged enough (in the negative Y direction)
+              if (info.offset.y < -100) {
+                removeAlert(alert.id); // Remove the alert
+              }
+            }}
+            layout // Enable layout animations for repositioning
           >
-            <div className="flex items-center justify-between">
-              <span className="font-light">{alert.text}</span>
-              <button
-                onClick={() => removeAlert(alert.id)}
-                className="ml-4 text-2xl rounded-xl text-white font-bold focus:outline-none active:text-black transition-colors"
-              >
-                &times;
-              </button>
-            </div>
+            {alert.loading && (
+              <div className="flex items-center justify-center h-full mr-3">
+                <div className="spinner flex items-center justify-center">
+                  <div className="bar1"></div>
+                  <div className="bar2"></div>
+                  <div className="bar3"></div>
+                  <div className="bar4"></div>
+                  <div className="bar5"></div>
+                  <div className="bar6"></div>
+                  <div className="bar7"></div>
+                  <div className="bar8"></div>
+                  <div className="bar9"></div>
+                  <div className="bar10"></div>
+                  <div className="bar11"></div>
+                  <div className="bar12"></div>
+                </div>
+              </div>
+            )}
 
-            {/* Progress bar with countdown */}
-            <div className="relative mt-3 w-full h-1 rounded-full">
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-teal-200 rounded-full"
-                initial={{ width: "100%" }}
-                animate={{ width: "0%" }}
-                transition={{ duration: alert.timeout / 1000, ease: "linear" }}
-              />
+            <div className="w-full h-full flex justify-center items-center">
+              <span className="font-medium text-sm" dir="rtl">
+                {alert.text}
+              </span>
             </div>
           </motion.div>
         ))}

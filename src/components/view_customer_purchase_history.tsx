@@ -17,10 +17,12 @@ export default function ViewCustomerPurchaseHistory({
   purchase,
   setUserPurchase,
   setUserClick,
+  onClose,
 }: {
   purchase: TransactionUsersType[];
   setUserPurchase: Dispatch<SetStateAction<TransactionUsersType[]>>;
   setUserClick: Dispatch<SetStateAction<RegisteredUsersType | null>>;
+  onClose: () => void;
 }) {
   const { courses } = useCourse();
 
@@ -60,6 +62,7 @@ export default function ViewCustomerPurchaseHistory({
             onClick={() => {
               setUserPurchase([]);
               setUserClick(null);
+              onClose();
             }}
           >
             بازگشت
@@ -67,7 +70,7 @@ export default function ViewCustomerPurchaseHistory({
         </div>
       </div>
 
-      <ScrollArea className="h-[70vh] mt-5">
+      <ScrollArea className="h-[65vh] mt-5">
         <div className="border border-[#D6D6D6] rounded-lg overflow-hidden">
           <Table className="w-full border-collapse" dir="ltr">
             <TableHeader>

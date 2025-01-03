@@ -78,6 +78,12 @@ export default function CooperationInSales() {
   const handleToggleButtonClick = () => {
     startLoading();
 
+    if (!registeredUsers || !courses) {
+      addAlert("شما کاربر یا دوره ایی برای فعال کردن این بخش ندارید", "error");
+      stopLoading();
+      return;
+    }
+
     const available_courses = (() => {
       return courses.map((item) => ({
         courseId: item._id,
@@ -171,91 +177,95 @@ export default function CooperationInSales() {
       <main className="mt-6 overflow-auto h-full">
         <section className="flex flex-col justify-center gap-5">
           <div>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="w-[400px] h-[5.5vh] justify-between"
-                >
-                  {availableUser.length === registeredUsers.length
-                    ? "همه ی کاربران"
-                    : "کاربران خاص"}
-                  <ChevronsUpDown className="opacity-50" />
-                </Button>
-              </PopoverTrigger>
+            {registeredUsers && (
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-[400px] h-[5.5vh] justify-between"
+                  >
+                    {availableUser.length === registeredUsers.length
+                      ? "همه ی کاربران"
+                      : "کاربران خاص"}
+                    <ChevronsUpDown className="opacity-50" />
+                  </Button>
+                </PopoverTrigger>
 
-              <PopoverContent className="w-[400px] p-0" dir="ltr">
-                <Command>
-                  <CommandInput placeholder="userId را وارد کنید" />
-                  <CommandList>
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                <PopoverContent className="w-[400px] p-0" dir="ltr">
+                  <Command>
+                    <CommandInput placeholder="userId را وارد کنید" />
+                    <CommandList>
+                      <CommandEmpty>No framework found.</CommandEmpty>
 
-                    <CommandGroup>
-                      {availableUser.length !== registeredUsers.length ? (
-                        <CommandItem
-                          className="cursor-pointer"
-                          key={"for_all_user"}
-                          value={"for_all_user"}
-                          onSelect={() => {
-                            setAvailableUser(registeredUsers);
-                          }}
-                        >
-                          برای همه ی کاربران
-                        </CommandItem>
-                      ) : (
-                        <></>
-                      )}
+                      <CommandGroup>
+                        {availableUser.length !== registeredUsers.length ? (
+                          <CommandItem
+                            className="cursor-pointer"
+                            key={"for_all_user"}
+                            value={"for_all_user"}
+                            onSelect={() => {
+                              setAvailableUser(registeredUsers);
+                            }}
+                          >
+                            برای همه ی کاربران
+                          </CommandItem>
+                        ) : (
+                          <></>
+                        )}
 
-                      {registeredUsers.map((user) => (
-                        <CommandItem
-                          className="cursor-pointer"
-                          key={user.userId.toString()}
-                          value={user.userId.toString()}
-                          onSelect={(currentValue) => {
-                            setAvailableUser((prev) =>
-                              prev.some(
-                                (item) => item.userId === Number(currentValue)
-                              )
-                                ? prev.filter(
-                                    (item) =>
-                                      item.userId !== Number(currentValue)
-                                  )
-                                : [...prev, { ...user }]
-                            );
-                          }}
-                        >
-                          {user.name} - {user.userId.toString()}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              availableUser.some(
-                                (item) => item.userId === user.userId
-                              )
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                        {registeredUsers.map((user) => (
+                          <CommandItem
+                            className="cursor-pointer"
+                            key={user.userId.toString()}
+                            value={user.userId.toString()}
+                            onSelect={(currentValue) => {
+                              setAvailableUser((prev) =>
+                                prev.some(
+                                  (item) => item.userId === Number(currentValue)
+                                )
+                                  ? prev.filter(
+                                      (item) =>
+                                        item.userId !== Number(currentValue)
+                                    )
+                                  : [...prev, { ...user }]
+                              );
+                            }}
+                          >
+                            {user.name} - {user.userId.toString()}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                availableUser.some(
+                                  (item) => item.userId === user.userId
+                                )
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
 
-          <div>
-            <Button
-              variant={"ghost"}
-              className="border-2 h-[5vh] w-[9%]"
-              disabled={isDisabled()}
-              onClick={saveUsers}
-            >
-              ذخیره
-            </Button>
-          </div>
+          {cooperationSalesClient?.settings?.status && (
+            <div>
+              <Button
+                variant={"ghost"}
+                className="border-2 h-[5vh] w-[9%]"
+                disabled={isDisabled()}
+                onClick={saveUsers}
+              >
+                ذخیره
+              </Button>
+            </div>
+          )}
         </section>
       </main>
     </div>

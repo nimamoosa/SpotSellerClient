@@ -108,135 +108,148 @@ export default function ActiveCourse() {
   return (
     <main className="overflow-auto h-full">
       <div className="h-[50vh] overflow-auto">
-        <div className="border border-[#D6D6D6] rounded-xl overflow-hidden">
-          <Table className="w-full border-collapse">
-            <TableHeader className="w-full">
-              <TableRow className="font-medium text-[16px] bg-[#F6F6F6] border-b border-gray-300">
-                <TableHead className="w-[70%] border-l-[1px] p-4 border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
-                  <p className="mr-3 w-fit">عنوان دوره</p>
-                </TableHead>
-                <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
-                  <p>عملیات</p>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {availableCourses && courses ? (
-                courses.map((item, index) => {
-                  return (
-                    <TableRow className="hover:bg-transparent" key={index}>
-                      <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
-                        <p className="mr-5">{item.title}</p>
-                      </TableCell>
-                      <TableCell className="flex justify-evenly items-center">
-                        <div className="-ml-2">
-                          <Button
-                            className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
-                            disabled={isLoading || !cooperationSalesClient}
-                            onClick={() =>
-                              handleUpdateCourseStatus(
-                                availableCourses.some(
-                                  (cooperation) =>
-                                    cooperation.courseId === item._id
-                                ),
-                                item._id
-                              )
-                            }
-                          >
-                            {availableCourses.find(
-                              (cooperation) => cooperation.courseId === item._id
-                            )
-                              ? "غیر فعال"
-                              : "فعال"}
-                          </Button>
-                        </div>
-
-                        <div className="-ml-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
-                                disabled={isLoading || !cooperationSalesClient}
-                              >
-                                درصد سهم
-                              </Button>
-                            </PopoverTrigger>
-
-                            <PopoverContent className="w-[150px]">
-                              <div>
-                                <Slider
-                                  defaultValue={[
-                                    availableCourses.find(
-                                      (cooperation) =>
-                                        cooperation.courseId === item._id
-                                    )?.share || 0,
-                                  ]}
-                                  max={100}
-                                  step={1}
-                                  value={[
-                                    availableCourses.find(
-                                      (cooperation) =>
-                                        cooperation.courseId === item._id
-                                    )?.share || 0,
-                                  ]}
-                                  onValueChange={(val) => {
-                                    setAvailableCourses((prev) => {
-                                      if (!prev) return [];
-
-                                      const updatedCourses = prev.map(
-                                        (course) => {
-                                          if (course.courseId === item._id) {
-                                            return {
-                                              ...course,
-                                              share: val[0] || 0,
-                                            };
-                                          }
-                                          return course;
-                                        }
-                                      );
-
-                                      return updatedCourses;
-                                    });
-                                  }}
-                                />
-                              </div>
-
-                              <DropdownMenuSeparator />
-
-                              <div className="flex items-center justify-center mt-5">
-                                <p>
-                                  %{" "}
-                                  {availableCourses.find(
+        {!cooperationSalesClient?.settings?.status ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <p>چیزی پیدا نشد!</p>
+          </div>
+        ) : (
+          <div className="border border-[#D6D6D6] rounded-xl overflow-hidden">
+            <Table className="w-full border-collapse">
+              <TableHeader className="w-full">
+                <TableRow className="font-medium text-[16px] bg-[#F6F6F6] border-b border-gray-300">
+                  <TableHead className="w-[70%] border-l-[1px] p-4 border-l-[#C6C6C6] rounded-tr-lg bg-[#F6F6F6] text-start">
+                    <p className="mr-3 w-fit">عنوان دوره</p>
+                  </TableHead>
+                  <TableHead className="w-[30%] rounded-tl-lg bg-[#F6F6F6] text-center">
+                    <p>عملیات</p>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {availableCourses && courses ? (
+                  courses.map((item, index) => {
+                    return (
+                      <TableRow className="hover:bg-transparent" key={index}>
+                        <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
+                          <p className="mr-5">{item.title}</p>
+                        </TableCell>
+                        <TableCell className="flex justify-evenly items-center">
+                          <div className="-ml-2">
+                            <Button
+                              className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
+                              disabled={isLoading || !cooperationSalesClient}
+                              onClick={() =>
+                                handleUpdateCourseStatus(
+                                  availableCourses.some(
                                     (cooperation) =>
                                       cooperation.courseId === item._id
-                                  )?.share || 0}{" "}
-                                </p>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <></>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                                  ),
+                                  item._id
+                                )
+                              }
+                            >
+                              {availableCourses.find(
+                                (cooperation) =>
+                                  cooperation.courseId === item._id
+                              )
+                                ? "غیر فعال"
+                                : "فعال"}
+                            </Button>
+                          </div>
+
+                          <div className="-ml-2">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
+                                  disabled={
+                                    isLoading || !cooperationSalesClient
+                                  }
+                                >
+                                  درصد سهم
+                                </Button>
+                              </PopoverTrigger>
+
+                              <PopoverContent className="w-[150px]">
+                                <div>
+                                  <Slider
+                                    defaultValue={[
+                                      availableCourses.find(
+                                        (cooperation) =>
+                                          cooperation.courseId === item._id
+                                      )?.share || 0,
+                                    ]}
+                                    max={100}
+                                    step={1}
+                                    value={[
+                                      availableCourses.find(
+                                        (cooperation) =>
+                                          cooperation.courseId === item._id
+                                      )?.share || 0,
+                                    ]}
+                                    onValueChange={(val) => {
+                                      setAvailableCourses((prev) => {
+                                        if (!prev) return [];
+
+                                        const updatedCourses = prev.map(
+                                          (course) => {
+                                            if (course.courseId === item._id) {
+                                              return {
+                                                ...course,
+                                                share: val[0] || 0,
+                                              };
+                                            }
+                                            return course;
+                                          }
+                                        );
+
+                                        return updatedCourses;
+                                      });
+                                    }}
+                                  />
+                                </div>
+
+                                <DropdownMenuSeparator />
+
+                                <div className="flex items-center justify-center mt-5">
+                                  <p>
+                                    %{" "}
+                                    {availableCourses.find(
+                                      (cooperation) =>
+                                        cooperation.courseId === item._id
+                                    )?.share || 0}{" "}
+                                  </p>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <></>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
 
-      <div className="mt-10">
-        <Button
-          variant={"ghost"}
-          className="border-2 rounded-lg h-[6vh]"
-          disabled={isDisabled()}
-          onClick={handleClickSave}
-        >
-          ذخیره تغییرات
-        </Button>
-      </div>
+      {!cooperationSalesClient?.settings?.status ? (
+        <></>
+      ) : (
+        <div className="mt-10">
+          <Button
+            variant={"ghost"}
+            className="border-2 rounded-lg h-[6vh]"
+            disabled={isDisabled()}
+            onClick={handleClickSave}
+          >
+            ذخیره تغییرات
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

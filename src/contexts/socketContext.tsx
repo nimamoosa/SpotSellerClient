@@ -16,6 +16,7 @@ import useLoading from "@/hooks/useLoading";
 import { Events, OnMethod } from "@/enum/event";
 import { DecJET, EncJET } from "@/funcs/encryptions";
 import { AUTH_SOCKET } from "@/enum/secure";
+import { randomBytes } from "crypto";
 
 // Create a single socket instance outside the component
 const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
@@ -30,6 +31,10 @@ const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   forceBase64: true,
   query: {
     key: process.env.NEXT_PUBLIC_API_KEY,
+    auth: EncJET(
+      JSON.stringify({ e: Buffer.from(randomBytes(20)).toString("base64") }),
+      process.env.NEXT_PUBLIC_ENC_SECRET
+    ),
   },
   auth: {
     email: DecJET(AUTH_SOCKET.E, process.env.NEXT_PUBLIC_ENC_SECRET).message,

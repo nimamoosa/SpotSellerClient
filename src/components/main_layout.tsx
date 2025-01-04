@@ -402,9 +402,8 @@ export default function MainLayout({
   const { user, setUser } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
-  const { isDisconnect, socket } = useSocket();
+  const { isDisconnect } = useSocket();
   const { addAlert, linkController, addLink, removeLink } = useController();
-  const router = useRouter();
 
   useEffect(() => {
     receiverEvent("logoutEventReceiver", (data) => {
@@ -523,8 +522,8 @@ export default function MainLayout({
                     start_icon={
                       hover === index ||
                       (item.href === "/dashboard"
-                        ? pathname === item.href // دقیقاً فقط `/dashboard`
-                        : pathname.startsWith(item.href)) // بقیه دکمه‌ها
+                        ? pathname === item.href
+                        : pathname.startsWith(item.href))
                         ? item.hover_icon
                         : item.out_icon
                     }
@@ -653,6 +652,7 @@ export default function MainLayout({
               </span>
             </div>
           </section>
+
           <section>
             <div>
               <Button

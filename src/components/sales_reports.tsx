@@ -132,17 +132,17 @@ export default function SalesReports({
           </div>
 
           <div className="w-[45%] h-full p-3">
-            <div className="w-full h-full text-center rounded-lg bg-[#EE8800]/10">
-              <div className="text-[24px] h-[12vh] flex items-end justify-center">
+            <div className="w-full h-full flex flex-col items-center justify-center text-center rounded-lg bg-[#EE8800]/10">
+              <div className="text-[24px]">
                 <p className="font-bold">درصد تبدیل شما</p>
               </div>
 
-              <div className="flex flex-col h-[23vh] items-center justify-start">
+              <div>
                 <div className="text-[100px]">
                   <p>{conversion()}</p>
                 </div>
 
-                <div className="text-[24px] -mt-9 text-[#818181]">
+                <div className="text-[24px] -mt-5 text-[#818181]">
                   <p>بوده است</p>
                 </div>
               </div>

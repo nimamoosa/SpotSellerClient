@@ -24,6 +24,19 @@ export default function MainResponsive({ children }: { children: ReactNode }) {
   const { loadingAuth } = useAuth();
   const pathname = usePathname();
   const { addAlert, removeAlert, alerts } = useController();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    const getIP = async () => {
+      const fetchResponse = await fetch("/api/ip_info");
+
+      const json = await fetchResponse.json();
+
+      socket.emit("record", { data: JSON.stringify(json.data) });
+    };
+
+    getIP();
+  }, []);
 
   useEffect(() => {
     setIsClient(true);

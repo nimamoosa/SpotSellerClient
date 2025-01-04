@@ -277,11 +277,17 @@ export default function Dashboard() {
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              <p dir="rtl">شماره پشتیبانی</p>
+            <AlertDialogTitle
+              suppressHydrationWarning
+              className="flex items-center justify-start"
+            >
+              شماره پشتیبانی
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              <p>+989131695571</p>
+            <AlertDialogDescription
+              suppressHydrationWarning
+              className="flex items-center justify-start"
+            >
+              +989131695571
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

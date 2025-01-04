@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { BsBucket } from "react-icons/bs";
+import { Spinner } from "./ui/spinner";
 
 export default function ShowCourse({
   addCourse,
@@ -46,8 +47,14 @@ export default function ShowCourse({
   }>({ type: "error", text: "" });
   const [openDialog, setOpenDialog] = useState(false);
   const [item, setItem] = useState<{ _id: string } | null>(null);
+  const [availableCourses, setAvailableCourses] = useState<CourseType[]>([]);
 
-  const { courses, addCourse: addNewCourse, deleteCourse } = useCourse();
+  const {
+    courses,
+    addCourse: addNewCourse,
+    deleteCourse,
+    isLoadingCourse,
+  } = useCourse();
   const { user } = useAuth();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
@@ -69,6 +76,12 @@ export default function ShowCourse({
     addAlert(alert.text, alert.type);
   }, [alert]);
 
+  useEffect(() => {
+    if (!courses) return;
+
+    setAvailableCourses(courses);
+  }, [courses]);
+
   return (
     <div className="w-full h-full">
       <header className="flex justify-between items-center">
@@ -89,6 +102,17 @@ export default function ShowCourse({
             <Input
               className="h-[48px] border-2 rounded-[10px] border-[#D6D6D6]"
               placeholder="جستجو..."
+              onChange={({ target: { value } }) => {
+                if (!value) return setAvailableCourses(courses);
+
+                setAvailableCourses((prev) =>
+                  prev.filter((course) =>
+                    course.title
+                      .toLowerCase()
+                      .includes(value.trim().toLowerCase())
+                  )
+                );
+              }}
             />
           </div>
 
@@ -143,49 +167,55 @@ export default function ShowCourse({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {courses?.map((item, index) => {
-                return (
-                  <TableRow className="hover:bg-transparent" key={index}>
-                    <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
-                      <p className="mr-5">{item.title}</p>
-                    </TableCell>
-                    <TableCell className="flex justify-between gap-5">
-                      <div className="-ml-2">
-                        <Button
-                          className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
-                          disabled={isLoading}
-                          onClick={() => editCourse && editCourse(item)}
-                        >
-                          <Pen /> ویرایش
-                        </Button>
-                      </div>
+              {isLoadingCourse ? (
+                <div>
+                  <Spinner>لطفا کمی صبر کنید....</Spinner>
+                </div>
+              ) : (
+                availableCourses?.map((item, index) => {
+                  return (
+                    <TableRow className="hover:bg-transparent" key={index}>
+                      <TableCell className="font-medium border-l-[1px] text-[16px] border-l-[#C6C6C6]">
+                        <p className="mr-5">{item.title}</p>
+                      </TableCell>
+                      <TableCell className="flex justify-between gap-5">
+                        <div className="-ml-2">
+                          <Button
+                            className="bg-[#66BB00]/10 text-[#519506] rounded-full hover:bg-[#66BB00]/20"
+                            disabled={isLoading}
+                            onClick={() => editCourse && editCourse(item)}
+                          >
+                            <Pen /> ویرایش
+                          </Button>
+                        </div>
 
-                      <div>
-                        <Button
-                          className="bg-[#BE6D05]/10 text-[#BE6D05] rounded-full hover:bg-[#BE6D05]/20"
-                          disabled={isLoading}
-                          onClick={() => saleState && saleState(item)}
-                        >
-                          <ChartColumn /> وضعیت فروش
-                        </Button>
-                      </div>
+                        <div>
+                          <Button
+                            className="bg-[#BE6D05]/10 text-[#BE6D05] rounded-full hover:bg-[#BE6D05]/20"
+                            disabled={isLoading}
+                            onClick={() => saleState && saleState(item)}
+                          >
+                            <ChartColumn /> وضعیت فروش
+                          </Button>
+                        </div>
 
-                      <div className="-mr-2">
-                        <Button
-                          className="bg-red-700/90 text-white hover:bg-red-700/80 rounded-full"
-                          disabled={isLoading}
-                          onClick={() => {
-                            setOpenDialog(true);
-                            setItem({ _id: item._id });
-                          }}
-                        >
-                          <BsBucket /> حذف دوره
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                        <div className="-mr-2">
+                          <Button
+                            className="bg-red-700/90 text-white hover:bg-red-700/80 rounded-full"
+                            disabled={isLoading}
+                            onClick={() => {
+                              setOpenDialog(true);
+                              setItem({ _id: item._id });
+                            }}
+                          >
+                            <BsBucket /> حذف دوره
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>

@@ -20,6 +20,15 @@ interface AlertState {
   loading?: boolean;
 }
 
+interface AlertButtonState {
+  id: string; // Unique identifier for each alert
+  text: string;
+  buttons: { content: string; onClick: () => void }[];
+  settings?: {
+    close_after_click_button: boolean;
+  };
+}
+
 const generateUniqueId = () =>
   `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 
@@ -56,12 +65,47 @@ function alertReducer(state: AlertState[], action: AlertAction): AlertState[] {
   }
 }
 
+type AlertButtonAction =
+  | {
+      type: "ADD";
+      payload: {
+        text: string;
+        buttons: { content: string; onClick: () => void }[];
+        settings?: {
+          close_after_click_button: boolean;
+        };
+      };
+    }
+  | { type: "REMOVE" };
+
+function alertButtonReducer(
+  state: AlertButtonState | null,
+  action: AlertButtonAction
+): AlertButtonState | null {
+  switch (action.type) {
+    case "ADD":
+      if (state) return state;
+
+      return {
+        id: generateUniqueId(),
+        ...action.payload,
+      };
+
+    case "REMOVE":
+      return null;
+
+    default:
+      return state;
+  }
+}
+
 interface ControllerContextProp {
   auth: string;
   setAuth: Dispatch<React.SetStateAction<string>>;
   code: string;
   setCode: Dispatch<React.SetStateAction<string>>;
   alerts: AlertState[];
+  alertButtons: AlertButtonState | null;
   addAlert: (
     text: string,
     type?: AlertType,
@@ -88,6 +132,14 @@ interface ControllerContextProp {
   >;
   layoutInfo: object | null;
   setLayoutInfo: Dispatch<SetStateAction<object | null>>;
+  addAlertButton: (
+    text: string,
+    buttons: { content: string; onClick: () => void }[],
+    settings?: {
+      close_after_click_button: boolean;
+    }
+  ) => void;
+  removeAlertButton: () => void;
 }
 
 const ControllerContext = createContext<ControllerContextProp>({
@@ -96,6 +148,7 @@ const ControllerContext = createContext<ControllerContextProp>({
   code: "",
   setCode: () => {},
   alerts: [],
+  alertButtons: null,
   addAlert: () => {},
   removeAlert: () => {},
   clearAlerts: () => {},
@@ -113,6 +166,8 @@ const ControllerContext = createContext<ControllerContextProp>({
   setNode: () => {},
   layoutInfo: null,
   setLayoutInfo: () => {},
+  addAlertButton: () => {},
+  removeAlertButton: () => {},
 });
 
 export default function ControllerProvider({
@@ -135,6 +190,10 @@ export default function ControllerProvider({
   const [layoutInfo, setLayoutInfo] = useState<object | null>(null);
 
   const [alerts, dispatchAlerts] = useReducer(alertReducer, []);
+  const [alertButtons, dispatchAlertsButton] = useReducer(
+    alertButtonReducer,
+    null
+  );
 
   const addAlert = (
     text: string,
@@ -142,20 +201,24 @@ export default function ControllerProvider({
     timeout = 3000,
     loading = false
   ) => {
-    const id = Date.now().toString();
     dispatchAlerts({
       type: "ADD_ALERT",
       payload: { text, type, timeout, loading },
     });
-
-    // Auto-remove alert after the specified timeout
-    setTimeout(() => {
-      dispatchAlerts({ type: "REMOVE_ALERT", payload: { id } });
-    }, timeout);
   };
 
   const removeAlert = (id: string) => {
     dispatchAlerts({ type: "REMOVE_ALERT", payload: { id } });
+  };
+
+  const addAlertButton = (
+    text: string,
+    buttons: { content: string; onClick: () => void }[],
+    settings?: {
+      close_after_click_button: boolean;
+    }
+  ) => {
+    dispatchAlertsButton({ type: "ADD", payload: { text, buttons, settings } });
   };
 
   const clearAlerts = () => {
@@ -186,6 +249,7 @@ export default function ControllerProvider({
         code,
         setCode,
         alerts,
+        alertButtons,
         addAlert,
         removeAlert,
         clearAlerts,
@@ -203,6 +267,10 @@ export default function ControllerProvider({
         setNode,
         layoutInfo,
         setLayoutInfo,
+        addAlertButton,
+        removeAlertButton() {
+          dispatchAlertsButton({ type: "REMOVE" });
+        },
       }}
     >
       {children}

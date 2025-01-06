@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useController } from "@/contexts/controllerContext";
+import { Button } from "./ui/button";
 
-const Alert: React.FC = () => {
+export const Alert: React.FC = () => {
   const { alerts, removeAlert } = useController();
 
   useEffect(() => {
@@ -82,4 +83,65 @@ const Alert: React.FC = () => {
   );
 };
 
-export default Alert;
+export const AlertButtons: React.FC = () => {
+  const { alertButtons, removeAlertButton } = useController();
+
+  const typeStyles = {
+    dark: "bg-gray-800/90 text-white backdrop-filter backdrop-blur-[8px] shadow-xl border-2 border-blue-900 shadow-lg",
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      {alertButtons && (
+        <div
+          dir="ltr"
+          className="fixed left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center justify-center gap-4 w-full h-full backdrop-filter backdrop-blur-[1.5px]"
+        >
+          <motion.div
+            key={alertButtons.id}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -30, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className={`min-w-[300px] max-w-full max-h-fit min-h-[30vh] p-2 flex items-center justify-between rounded-[22px] ${typeStyles["dark"]}`}
+          >
+            <div className="w-full h-full flex flex-col justify-between gap-3 p-3 items-center">
+              <div>
+                <span className="text-xl font-semibold" dir="rtl">
+                  {alertButtons.text}
+                </span>
+              </div>
+
+              <footer className="flex justify-around w-full">
+                {alertButtons.buttons.map((button, index) => (
+                  <Button
+                    variant="default"
+                    type="button"
+                    onClick={() => {
+                      button.onClick();
+
+                      if (alertButtons.settings?.close_after_click_button) {
+                        removeAlertButton();
+                      }
+                    }}
+                    key={index}
+                  >
+                    {button.content}
+                  </Button>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={removeAlertButton}
+                >
+                  خیر
+                </Button>
+              </footer>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};

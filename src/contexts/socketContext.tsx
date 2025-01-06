@@ -23,8 +23,6 @@ const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: 10,
-  timeout: 86400000,
-  forceNew: true,
   path: "/socket-server",
   secure: true,
   withCredentials: true,

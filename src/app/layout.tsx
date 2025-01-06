@@ -18,6 +18,7 @@ import "./globals.css";
 import CooperationSalesProvider from "@/contexts/cooperationSaleContext";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://spotseller.ir"),
   title: "Spot Seller - اسپات سلر",
   description: "سرویس مدیریت اسپات پلیر",
   icons: "/icon.svg",

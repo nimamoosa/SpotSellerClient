@@ -32,8 +32,6 @@ export const GET = async (req: Request) => {
 
     const geoData = await response.json();
 
-    console.log(geoData, ip);
-
     return NextResponse.json({ ok: true, data: geoData }, { status: 200 });
   } catch (error) {
     return NextResponse.json(

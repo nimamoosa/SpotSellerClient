@@ -142,15 +142,15 @@ export default function ActiveCourse() {
                                 handleUpdateCourseStatus(
                                   availableCourses.some(
                                     (cooperation) =>
-                                      cooperation.courseId === item._id
+                                      cooperation.courseId === item.id
                                   ),
-                                  item._id
+                                  item.id
                                 )
                               }
                             >
                               {availableCourses.find(
                                 (cooperation) =>
-                                  cooperation.courseId === item._id
+                                  cooperation.courseId === item.id
                               )
                                 ? "غیر فعال"
                                 : "فعال"}
@@ -176,7 +176,7 @@ export default function ActiveCourse() {
                                     defaultValue={[
                                       availableCourses.find(
                                         (cooperation) =>
-                                          cooperation.courseId === item._id
+                                          cooperation.courseId === item.id
                                       )?.share || 0,
                                     ]}
                                     max={100}
@@ -184,7 +184,7 @@ export default function ActiveCourse() {
                                     value={[
                                       availableCourses.find(
                                         (cooperation) =>
-                                          cooperation.courseId === item._id
+                                          cooperation.courseId === item.id
                                       )?.share || 0,
                                     ]}
                                     onValueChange={(val) => {
@@ -193,7 +193,7 @@ export default function ActiveCourse() {
 
                                         const updatedCourses = prev.map(
                                           (course) => {
-                                            if (course.courseId === item._id) {
+                                            if (course.courseId === item.id) {
                                               return {
                                                 ...course,
                                                 share: val[0] || 0,
@@ -216,7 +216,7 @@ export default function ActiveCourse() {
                                     %{" "}
                                     {availableCourses.find(
                                       (cooperation) =>
-                                        cooperation.courseId === item._id
+                                        cooperation.courseId === item.id
                                     )?.share || 0}{" "}
                                   </p>
                                 </div>

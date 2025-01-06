@@ -87,7 +87,7 @@ export default function ManagementOfCourses() {
     if (type === "sales_reports") {
       return (
         <SalesReports
-          course={courses.find((item) => item._id === course?._id)}
+          course={courses.find((item) => item.id === course?.id)}
           back={() => setType("show_course")}
         />
       );

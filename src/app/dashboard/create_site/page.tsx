@@ -1203,9 +1203,8 @@ export default function CreateSite() {
                       <img
                         className="rounded-2xl"
                         src={
-                          fileUrls.find(
-                            (file) => file.controllerId === item._id
-                          )?.file || "/Frame 1.jpg"
+                          fileUrls.find((file) => file.controllerId === item.id)
+                            ?.file || "/Frame 1.jpg"
                         }
                         alt="img"
                       />

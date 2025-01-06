@@ -17,7 +17,7 @@ import { useSocketRequest } from "@/hooks/useSocketRequest";
 type CourseAction =
   | { type: "ADD"; payload: CourseType }
   | { type: "EDIT"; payload: CourseType }
-  | { type: "DELETE"; payload: { _id: string } }
+  | { type: "DELETE"; payload: { id: string } }
   | { type: "ADD_ARRAY"; payload: CourseType[] };
 
 function courseReducer(state: CourseType[], action: CourseAction) {
@@ -25,7 +25,7 @@ function courseReducer(state: CourseType[], action: CourseAction) {
     case "ADD":
       return [...state, action.payload];
     case "DELETE":
-      return state.filter((course) => course._id !== action.payload._id);
+      return state.filter((course) => course.id !== action.payload.id);
     case "ADD_ARRAY":
       return action.payload;
     default:
@@ -61,8 +61,8 @@ export default function CourseProvider({ children }: { children: ReactNode }) {
     dispatchCourse({ type: "ADD", payload: course });
   };
 
-  const deleteCourse = (_id: string) => {
-    dispatchCourse({ type: "DELETE", payload: { _id } });
+  const deleteCourse = (id: string) => {
+    dispatchCourse({ type: "DELETE", payload: { id } });
   };
 
   const addArrayCourse = (courses: CourseType[]) => {
@@ -79,7 +79,14 @@ export default function CourseProvider({ children }: { children: ReactNode }) {
 
       if (!data.success) return;
 
-      addArrayCourse(data.data);
+      const format = data.data.map((item: any) => {
+        return {
+          id: item._id,
+          ...item,
+        };
+      });
+
+      addArrayCourse(format);
     });
   }, [user]);
 

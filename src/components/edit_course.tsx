@@ -94,7 +94,7 @@ export default function EditCourse({
     if (!course) return;
 
     setPreview(
-      fileUrls.find((file) => file.controllerId === course._id)?.file || ""
+      fileUrls.find((file) => file.controllerId === course.id)?.file || ""
     );
   }, [fileUrls, course]);
 
@@ -120,7 +120,7 @@ export default function EditCourse({
     receiverEvent(ReceiverEvents.DELETE_FILE, (data) => {
       if (data.success === false) return setError(data.message);
 
-      removeFile(data._id);
+      removeFile(data.id);
     });
   }, []);
 
@@ -129,7 +129,7 @@ export default function EditCourse({
 
     sendEvent(Events.DELETE_FILE, {
       downloadLink: course?.media_url,
-      _id: course?._id,
+      id: course?.id,
     });
   }, [isUploaded]);
 
@@ -161,7 +161,7 @@ export default function EditCourse({
 
     sendEvent(Events.EDIT_COURSE, {
       userId: user.userId,
-      _id: course._id,
+      id: course.id,
       updatedCourseData,
     });
 
@@ -358,7 +358,7 @@ export default function EditCourse({
 
     sendEvent("editCourse", {
       userId: user.userId,
-      _id: course._id,
+      id: course.id,
       updatedCourseData,
     });
   }, [user, values, course, discountCode, discountAmount]);

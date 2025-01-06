@@ -64,7 +64,7 @@ export default function ShowCourse({
     receiverEvent("deleteCourseEventReceiver", (data) => {
       if (!data.success) return setAlert({ type: "error", text: data.message });
 
-      deleteCourse(data._id);
+      deleteCourse(data.id);
       setAlert({ type: "success", text: "دوره با موفقیت پاک شد" });
       stopLoading();
     });
@@ -205,7 +205,7 @@ export default function ShowCourse({
                             disabled={isLoading}
                             onClick={() => {
                               setOpenDialog(true);
-                              setItem({ _id: item._id });
+                              setItem({ _id: item.id });
                             }}
                           >
                             <BsBucket /> حذف دوره

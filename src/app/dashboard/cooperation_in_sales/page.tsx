@@ -86,7 +86,7 @@ export default function CooperationInSales() {
 
     const available_courses = (() => {
       return courses.map((item) => ({
-        courseId: item._id,
+        courseId: item.id,
         share: 0,
         share_for_users: [],
       }));

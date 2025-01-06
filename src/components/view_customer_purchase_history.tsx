@@ -100,7 +100,7 @@ export default function ViewCustomerPurchaseHistory({
 
                   <TableCell className="text-end border-l border-gray-300">
                     <p className="mr-3">
-                      {courses.find((course) => course._id === item._id)?.title}
+                      {courses.find((course) => course.id === item._id)?.title}
                     </p>
                   </TableCell>
                 </TableRow>

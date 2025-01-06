@@ -76,7 +76,7 @@ export default function FileProvider({ children }: { children: ReactNode }) {
 
               return {
                 blob: await response.blob(),
-                controllerId: course._id,
+                controllerId: course.id,
               };
             } catch (error) {
               return null; // Return null to handle errors gracefully

@@ -170,7 +170,7 @@ export default function ShowCourse({
                   sendEvent("deleteCourse", {
                     botId: user?.botId,
                     userId: user?.userId,
-                    _id: item?._id,
+                    id: item?._id,
                   });
                 }}
               >

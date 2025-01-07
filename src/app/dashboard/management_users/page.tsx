@@ -29,10 +29,10 @@ import { useTransaction } from "@/contexts/transactionContext";
 import useLoading from "@/hooks/useLoading";
 import { useSocketRequest } from "@/hooks/useSocketRequest";
 import { RegisteredUsersType } from "@/types/registeredUsersType";
-import { TransactionUsersType } from "@/types/visit";
+import { TransactionType, TransactionUsersType } from "@/types/visit";
 import { Ban, Check, Pen } from "lucide-react";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { BsBucket } from "react-icons/bs";
 
 export default function ManagementUsers() {
@@ -40,6 +40,7 @@ export default function ManagementUsers() {
   const [userPurchase, setUserPurchase] = useState<TransactionUsersType[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [routeType, setRouteType] = useState<string>("");
+  const hasRequest = useRef<boolean>(false);
 
   const { registeredUsers, setRegisteredUsers, isLoadingRegisteredUsers } =
     useRegisteredUsers();
@@ -76,54 +77,76 @@ export default function ManagementUsers() {
     });
   }, []);
 
+  // useEffect(() => {
+  //   if (!transactions || isLoadingTransactions || !userClick || openDialog)
+  //     return;
+  //   if (routeType !== "purchase_history") return;
+
+  //   const newUpdate = transactions
+  //     .filter((item) =>
+  //       item.users.find((item) => item.userId === userClick.userId)
+  //     )
+  //     .flat()
+  //     .flatMap((i) => i.users);
+
+  //   if (newUpdate.length === 0) return;
+
+  //   const isDifferent = newUpdate.some(
+  //     (user, index) =>
+  //       user.userId !== userPurchase[index]?.userId ||
+  //       user.type !== userPurchase[index]?.type
+  //   );
+
+  //   if (isDifferent) {
+  //     setUserPurchase(newUpdate);
+  //   }
+  // }, [
+  //   transactions,
+  //   userPurchase,
+  //   isLoadingTransactions,
+  //   userClick,
+  //   openDialog,
+  //   routeType,
+  // ]);
+
+  // useEffect(() => {
+  //   if (!userClick || !transactions.length) return;
+  //   if (routeType !== "purchase_history") return;
+
+  //   const relatedTransactions = transactions.filter((transaction) =>
+  //     transaction.users.some((user) => user.userId === userClick.userId)
+  //   );
+
+  //   const relatedUsers = relatedTransactions.flatMap(
+  //     (transaction) => transaction.users
+  //   );
+
+  //   console.log(relatedTransactions.length, relatedUsers.length);
+
+  //   if (relatedUsers.length !== userPurchase.length) {
+  //     setUserPurchase(relatedUsers);
+  //   }
+  // }, [transactions, userClick, routeType]);
+
   useEffect(() => {
-    if (!transactions || isLoadingTransactions || !userClick || openDialog)
-      return;
+    if (!userClick) return;
     if (routeType !== "purchase_history") return;
+    if (!hasRequest) return;
 
-    const newUpdate = transactions
-      .filter((item) =>
-        item.users.find((item) => item.userId === userClick.userId)
-      )
-      .flat()
-      .flatMap((i) => i.users);
+    hasRequest.current = true;
 
-    if (newUpdate.length === 0) return;
+    receiverEvent("getTransactionsEventReceiver", (data) => {
+      hasRequest.current = false;
 
-    const isDifferent = newUpdate.some(
-      (user, index) =>
-        user.userId !== userPurchase[index]?.userId ||
-        user.type !== userPurchase[index]?.type
-    );
+      if (!data.success) return;
 
-    if (isDifferent) {
-      setUserPurchase(newUpdate);
-    }
-  }, [
-    transactions,
-    userPurchase,
-    isLoadingTransactions,
-    userClick,
-    openDialog,
-    routeType,
-  ]);
-
-  useEffect(() => {
-    if (!userClick || !transactions.length) return;
-    if (routeType !== "purchase_history") return;
-
-    const relatedTransactions = transactions.filter((transaction) =>
-      transaction.users.some((user) => user.userId === userClick.userId)
-    );
-
-    const relatedUsers = relatedTransactions.flatMap(
-      (transaction) => transaction.users
-    );
-
-    if (relatedUsers.length !== userPurchase.length) {
-      setUserPurchase(relatedUsers);
-    }
-  }, [transactions, userClick, routeType]);
+      setUserPurchase(
+        data.data.transactions.filter((transaction: TransactionType) =>
+          transaction.users.some((user) => user.userId === userClick.userId)
+        )
+      );
+    });
+  }, [userClick, routeType, hasRequest]);
 
   const handleBanedUser = useCallback(
     (userId: number, status: boolean) => {
@@ -142,17 +165,24 @@ export default function ManagementUsers() {
   const handleOnClick = (user: RegisteredUsersType) => {
     setUserClick(user);
 
-    const tran = transactions.filter((item) =>
-      item.users.find((item) => item.userId == user.userId)
-    );
+    const matchedTransactions: TransactionUsersType[] = [];
 
-    const fix = tran.flat().flatMap((i) => i.users);
+    transactions.forEach((transaction) => {
+      transaction.users.forEach((transactionUser) => {
+        if (transactionUser.userId === user.userId) {
+          matchedTransactions.push(transactionUser);
+        }
+      });
+    });
 
-    if (fix.length <= 0) return addAlert("این کاربر تراکنشی ندارد", "info");
+    if (matchedTransactions.length <= 0) {
+      addAlert("این کاربر تراکنشی ندارد", "info");
+      return;
+    }
 
     setRouteType("purchase_history");
 
-    setUserPurchase(fix);
+    setUserPurchase(matchedTransactions);
   };
 
   const renderPage = useCallback(() => {

@@ -31,6 +31,7 @@ import {
 } from "./ui/alert-dialog";
 import { BsBucket } from "react-icons/bs";
 import { Spinner } from "./ui/spinner";
+import { useSearchParams } from "next/navigation";
 
 export default function ShowCourse({
   addCourse,
@@ -48,6 +49,7 @@ export default function ShowCourse({
   const [openDialog, setOpenDialog] = useState(false);
   const [item, setItem] = useState<{ _id: string } | null>(null);
   const [availableCourses, setAvailableCourses] = useState<CourseType[]>([]);
+  const [courseId, setCourseId] = useState("");
 
   const {
     courses,
@@ -59,6 +61,7 @@ export default function ShowCourse({
   const { startLoading, stopLoading, isLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { addAlert } = useController();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     receiverEvent("deleteCourseEventReceiver", (data) => {
@@ -82,6 +85,26 @@ export default function ShowCourse({
     setAvailableCourses(courses);
   }, [courses]);
 
+  useEffect(() => {
+    const Id = searchParams.get("id");
+
+    if (!Id || !courses) return;
+
+    setCourseId(
+      courses.find((item) => item.id.trim() === Id.trim())?.title || ""
+    );
+  }, [searchParams, courses]);
+
+  useEffect(() => {
+    if (!courseId) return;
+
+    setAvailableCourses((prev) =>
+      prev.filter((course) =>
+        course.title.toLowerCase().includes(courseId.trim().toLowerCase())
+      )
+    );
+  }, [courseId]);
+
   return (
     <div className="w-full h-full">
       <header className="flex justify-between items-center">
@@ -102,6 +125,7 @@ export default function ShowCourse({
             <Input
               className="h-[48px] border-2 rounded-[10px] border-[#D6D6D6]"
               placeholder="جستجو..."
+              value={courseId || ""}
               onChange={({ target: { value } }) => {
                 if (!value) return setAvailableCourses(courses);
 
@@ -112,6 +136,8 @@ export default function ShowCourse({
                       .includes(value.trim().toLowerCase())
                   )
                 );
+
+                setCourseId(value);
               }}
             />
           </div>

@@ -32,7 +32,7 @@ export const GET = async (req: Request) => {
 
     const geoData = await response.json();
 
-    return NextResponse.json({ ok: true, data: geoData }, { status: 200 });
+    return NextResponse.json({ ok: true, data: geoData, ip }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { ok: false, message: "Error fetching IP information" },

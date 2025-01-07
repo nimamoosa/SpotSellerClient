@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 
 type IPInfo = {
   country_code?: string;
+  ip: string;
 };
 
 export default function PaymentPage() {

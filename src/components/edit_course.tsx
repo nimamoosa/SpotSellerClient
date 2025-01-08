@@ -67,7 +67,14 @@ export default function EditCourse({
 
   useEffect(() => {
     receiverEvent(ReceiverEvents.EDIT_COURSE, (data) => {
-      addArrayCourse(data.updatedCourse.courses);
+      const format = data.updatedCourse.courses.map((item: any) => {
+        return {
+          id: item._id,
+          ...item,
+        };
+      });
+
+      addArrayCourse(format);
 
       stopLoading();
       backClick();

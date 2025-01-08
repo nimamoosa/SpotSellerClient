@@ -74,7 +74,14 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     receiverEvent(ReceiverEvents.CREATE_COURSE, (data) => {
       if (!data.success) return;
 
-      addArrayCourse(data.data.courses);
+      const format = data.data.courses.map((item: any) => {
+        return {
+          id: item._id,
+          ...item,
+        };
+      });
+
+      addArrayCourse(format);
 
       backClick();
       stopLoading();

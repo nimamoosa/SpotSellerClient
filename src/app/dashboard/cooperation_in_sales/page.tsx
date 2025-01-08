@@ -78,7 +78,7 @@ export default function CooperationInSales() {
   const handleToggleButtonClick = () => {
     startLoading();
 
-    if (!registeredUsers || !courses) {
+    if (!registeredUsers || courses.length === 0) {
       addAlert("شما کاربر یا دوره ایی برای فعال کردن این بخش ندارید", "error");
       stopLoading();
       return;

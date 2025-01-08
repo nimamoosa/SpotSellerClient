@@ -140,11 +140,17 @@ export default function ManagementUsers() {
 
       if (!data.success) return;
 
-      setUserPurchase(
-        data.data.transactions.filter((transaction: TransactionType) =>
-          transaction.users.some((user) => user.userId === userClick.userId)
-        )
-      );
+      const matchedTransactions: TransactionUsersType[] = [];
+
+      data.data.transactions.forEach((transaction: TransactionType) => {
+        transaction.users.forEach((transactionUser) => {
+          if (transactionUser.userId === userClick.userId) {
+            matchedTransactions.push(transactionUser);
+          }
+        });
+      });
+
+      setUserPurchase(matchedTransactions);
     });
   }, [userClick, routeType, hasRequest]);
 

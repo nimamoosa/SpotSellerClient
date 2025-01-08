@@ -128,7 +128,7 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
@@ -143,8 +143,54 @@ export default function AddCourse({ backClick }: { backClick: () => void }) {
       return addAlert("نوع فایل صحیح نمی باشد", "error");
 
     if (file) {
+      const compressFile = (
+        file: File,
+        maxSizeInMB: number = 1,
+        quality: number = 0.5
+      ): Promise<File> => {
+        return new Promise((resolve, reject) => {
+          if (!file) {
+            reject(new Error("No file provided for compression."));
+            return;
+          }
+
+          // Check if the file is already under the size limit
+          const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+          if (file.size <= maxSizeInBytes) {
+            resolve(file);
+            return;
+          }
+
+          new Compressor(file, {
+            quality, // Initial quality setting
+            maxWidth: 1920, // Set max width for resizing (optional)
+            maxHeight: 1080, // Set max height for resizing (optional)
+            convertSize: maxSizeInBytes, // Automatically compress if larger than max size
+            mimeType: "image/webp", // Convert to WebP format using mimeType
+            success(compressedFile) {
+              // Verify compressed file size
+              if (compressedFile.size <= maxSizeInBytes) {
+                resolve(compressedFile as File);
+              } else {
+                // Further compress if needed
+                reject(
+                  new Error(
+                    "File could not be compressed under the desired size."
+                  )
+                );
+              }
+            },
+            error(err) {
+              reject(err);
+            },
+          });
+        });
+      };
+
+      const compressed = await compressFile(file);
+
       setSelectedFile(file);
-      setPreview(URL.createObjectURL(file));
+      setPreview(URL.createObjectURL(compressed));
     }
   };
 

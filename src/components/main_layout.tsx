@@ -13,6 +13,7 @@ import { ReactNode, useCallback, useEffect, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 import { ScrollArea } from "./ui/scroll-area";
 import Image from "next/image";
+import { MainLayoutBody, MainLayoutHeader } from "./common/main_layout";
 
 export default function MainLayout({
   children,
@@ -399,7 +400,7 @@ export default function MainLayout({
   const [ping, setPing] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState("30");
 
-  const { user, setUser } = useAuth();
+  const { user, setUser, loadingAuth } = useAuth();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { sendEvent, receiverEvent } = useSocketRequest();
   const { isDisconnect } = useSocket();
@@ -518,6 +519,7 @@ export default function MainLayout({
                   key={index}
                 >
                   <DashboardButton
+                    isLoading={isDisconnect || loadingAuth}
                     disabled={isDisconnect}
                     start_icon={
                       hover === index ||
@@ -644,13 +646,8 @@ export default function MainLayout({
 
       <section className="flex flex-col items-center justify-center w-[75%]">
         <header className="w-full h-[80px] flex items-center justify-between p-5">
-          <section className="flex gap-5">
-            <div>
-              <span className="font-bold font_sa text-xl" dir="ltr">
-                👋 <span className="font-semibold">{user?.name}</span> عزیز, خوش
-                اومدی
-              </span>
-            </div>
+          <section className="flex gap-5 w-full">
+            <MainLayoutHeader />
           </section>
 
           <section>
@@ -668,83 +665,85 @@ export default function MainLayout({
           </section>
         </header>
 
-        <main className="w-full h-full flex flex-col items-center rounded-tr-[37px] bg-white">
-          <section
-            slot="top"
-            className="h-[10vh] w-[95%] flex items-center p-2"
-          >
-            <div className="flex items-center w-[50%] h-[10vh] ml-auto mr-auto text-xl font-semibold">
-              <span className="flex items-center justify-center">
-                پنل ناشر <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
-                <span>
-                  {buttons
-                    .sort((a, b) => b.href.length - a.href.length)
-                    .find((button) => pathname.startsWith(button.href))?.text ||
-                    ""}
+        <MainLayoutBody>
+          <main className="w-full h-full flex flex-col items-center rounded-tr-[37px] bg-white">
+            <section
+              slot="top"
+              className="h-[10vh] w-[95%] flex items-center p-2"
+            >
+              <div className="flex items-center w-[50%] h-[10vh] ml-auto mr-auto text-xl font-semibold">
+                <span className="flex items-center justify-center">
+                  پنل ناشر <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
+                  <span>
+                    {buttons
+                      .sort((a, b) => b.href.length - a.href.length)
+                      .find((button) => pathname.startsWith(button.href))
+                      ?.text || ""}
+                  </span>
+                  {linkController.map((item, index) => {
+                    return (
+                      <span
+                        key={index}
+                        className="flex items-center justify-center"
+                      >
+                        <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
+                        {item.link}
+                      </span>
+                    );
+                  })}
                 </span>
-                {linkController.map((item, index) => {
-                  return (
-                    <span
-                      key={index}
-                      className="flex items-center justify-center"
-                    >
-                      <BsArrowLeft className="ml-2 mr-2" size={20} />{" "}
-                      {item.link}
-                    </span>
-                  );
-                })}
-              </span>
-            </div>
+              </div>
 
-            <div className="w-[50%] flex items-center justify-end">
-              <p
-                dir="ltr"
-                className={`${
-                  secondsLeft === "0" ? "text-red-600" : "text-black"
-                } flex items-center justify-center gap-3 text-xl font-semibold`}
-              >
-                {secondsLeft}{" "}
-              </p>
-            </div>
-          </section>
+              <div className="w-[50%] flex items-center justify-end">
+                <p
+                  dir="ltr"
+                  className={`${
+                    secondsLeft === "0" ? "text-red-600" : "text-black"
+                  } flex items-center justify-center gap-3 text-xl font-semibold`}
+                >
+                  {secondsLeft}{" "}
+                </p>
+              </div>
+            </section>
 
-          <section
-            className={`w-[95%] h-[77vh] relative mt-5`}
-            slot="main"
-            suppressHydrationWarning
-          >
-            {isDisconnect && (
+            <section
+              className={`w-[95%] h-[77vh] relative mt-1.5`}
+              slot="main"
+              suppressHydrationWarning
+            >
+              {isDisconnect && (
+                <div
+                  className={`fixed z-50 flex items-center justify-center ${
+                    pathname === "/dashboard/create_site"
+                      ? "bg-black/90 w-full h-full top-0 left-0"
+                      : "left-0 top-[10vh] w-[75%] h-[90vh]"
+                  }`}
+                >
+                  <div
+                    className="bg-red-800/95 text-white text-2xl rounded-2xl shadow-lg p-5"
+                    dir="ltr"
+                  >
+                    <p className="flex justify-center gap-3 animate-pulse">
+                      connecting network <Wifi size={27} />
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div
-                className={`fixed z-50 flex items-center justify-center ${
-                  pathname === "/dashboard/create_site"
-                    ? "bg-black/90 w-full h-full top-0 left-0"
-                    : "left-0 top-[10vh] w-[75%] h-[90vh]"
+                className={`h-[100%] w-full inset-0 ${
+                  isDisconnect && pathname !== "/dashboard/create_site"
+                    ? "opacity-50"
+                    : isDisconnect && pathname === "/dashboard/create_site"
+                    ? ""
+                    : ""
                 }`}
               >
-                <div
-                  className="bg-red-800/95 text-white text-2xl rounded-2xl shadow-lg p-5"
-                  dir="ltr"
-                >
-                  <p className="flex justify-center gap-3 animate-pulse">
-                    connecting network <Wifi size={27} />
-                  </p>
-                </div>
+                {children}
               </div>
-            )}
-
-            <div
-              className={`h-[100%] w-full inset-0 ${
-                isDisconnect && pathname !== "/dashboard/create_site"
-                  ? "opacity-50"
-                  : isDisconnect && pathname === "/dashboard/create_site"
-                  ? ""
-                  : ""
-              }`}
-            >
-              {children}
-            </div>
-          </section>
-        </main>
+            </section>
+          </main>
+        </MainLayoutBody>
       </section>
     </div>
   );

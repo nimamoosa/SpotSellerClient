@@ -1,5 +1,6 @@
 import { DashboardButtonType } from "@/types/dashboard_button_type";
 import Link from "next/link";
+import { Skeleton } from "./ui/skeleton";
 
 interface props extends DashboardButtonType {}
 
@@ -10,22 +11,27 @@ export default function DashboardButton({
   className,
   href,
   disabled,
+  isLoading,
   onClick,
   onMouseOver,
   onMouseOut,
 }: props) {
   // Prevent default action if disabled
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (disabled) {
+    if (disabled || isLoading) {
       e.preventDefault(); // Prevent the link from being followed
     } else {
       onClick && onClick(); // Call onClick if available and not disabled
     }
   };
 
-  return (
+  return isLoading ? (
+    <div className="w-[326px] h-[63.5px]">
+      <Skeleton className="w-full h-full rounded-full bg-black/40" />
+    </div>
+  ) : (
     <Link
-      className={`text-black text-[17px] w-[326px] flex items-center justify-between h-[63.5px] p-5 rounded-full transition-all ease-in-out duration-75 ${
+      className={`text-black text-[17px] w-[326px] h-[63.5px] flex items-center justify-between p-5 rounded-full transition-all ease-in-out duration-75 ${
         !disabled
           ? className?.className
           : "bg-black/20 opacity-[.5] cursor-not-allowed"

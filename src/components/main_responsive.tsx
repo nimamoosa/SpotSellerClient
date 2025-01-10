@@ -35,8 +35,6 @@ export default function MainResponsive({ children }: { children: ReactNode }) {
             لطفا برای استفاده از spotseller از لپ تاپ یا کامپیوتر وارد شوید
           </p>
         </div>
-      ) : loadingAuth && !pathname.startsWith("/payment") ? (
-        <LoadingPage />
       ) : (
         <>{children}</>
       )}

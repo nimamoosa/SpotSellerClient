@@ -65,6 +65,8 @@ export default function SocketProvider({ children }: { children: ReactNode }) {
       stopLoading();
     });
 
+    socket.emit;
+
     return () => {
       socket.off(OnMethod.CONNECT);
       socket.off(OnMethod.DISCONNECT);

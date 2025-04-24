@@ -42,7 +42,7 @@ export default function Dashboard() {
     {
       header: isLoadingTransactions
         ? "connect...."
-        : transactions.find(
+        : transactions?.find(
             (item) => item.date.split("/")[1] === time.jm.toString()
           )?.users.length || 0,
       description: "تراکنش در این ماه",

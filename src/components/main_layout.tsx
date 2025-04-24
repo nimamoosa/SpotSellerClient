@@ -645,7 +645,7 @@ export default function MainLayout({
       </section>
 
       <section className="flex flex-col items-center justify-center w-[75%]">
-        <header className="w-full h-[80px] flex items-center justify-between p-5">
+        <header className="w-full h-[10vh] flex items-center justify-between p-5">
           <section className="flex gap-5 w-full">
             <MainLayoutHeader />
           </section>
@@ -666,7 +666,7 @@ export default function MainLayout({
         </header>
 
         <MainLayoutBody>
-          <main className="w-full h-full flex flex-col items-center rounded-tr-[37px] bg-white">
+          <main className="w-full h-[90vh] flex flex-col items-center rounded-tr-[37px] bg-white">
             <section
               slot="top"
               className="h-[10vh] w-[95%] flex items-center p-2"
@@ -707,7 +707,7 @@ export default function MainLayout({
             </section>
 
             <section
-              className={`w-[95%] h-[77vh] relative mt-1.5`}
+              className={`w-[95%] h-[77vh] relative mt-1`}
               slot="main"
               suppressHydrationWarning
             >

@@ -9,20 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCooperationSales } from "@/contexts/cooperationSaleContext";
-import { useEffect } from "react";
 
 export default function Sales() {
-  const {
-    cooperationSalesClient,
-    cooperationSales,
-    isLoadingCooperationSalesClient,
-  } = useCooperationSales();
-
-  useEffect(() => {
-    if (!cooperationSales) return;
-
-    console.log(cooperationSales);
-  }, [cooperationSales]);
+  const { cooperationSales } = useCooperationSales();
 
   return (
     <div>
